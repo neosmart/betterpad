@@ -42,8 +42,8 @@ namespace betterpad
         {
             InitializeComponent();
             InitializeShortcuts();
-            InitializeLayout();
             InitializeMenuHandlers();
+            InitializeLayout();
             GetDocumentNumber();
             SetTitle($"Untitled {_documentNumber}");
             _lastHash = DocumentHash;
@@ -134,6 +134,8 @@ namespace betterpad
             text.Padding = new Padding(12, 10, 12, 10);
             text_SelectionChanged(null, null);
             text_TextChanged(null, null);
+            statusBarToolStripMenuItem.PerformClick();
+            wordWrapToolStripMenuItem.PerformClick();
         }
 
         protected override bool ProcessCmdKey(ref Message msg, Keys keyData)

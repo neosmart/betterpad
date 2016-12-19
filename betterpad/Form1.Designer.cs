@@ -328,9 +328,7 @@
             // 
             // wordWrapToolStripMenuItem
             // 
-            this.wordWrapToolStripMenuItem.Checked = true;
             this.wordWrapToolStripMenuItem.CheckOnClick = true;
-            this.wordWrapToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
             this.wordWrapToolStripMenuItem.Name = "wordWrapToolStripMenuItem";
             this.wordWrapToolStripMenuItem.Size = new System.Drawing.Size(240, 34);
             this.wordWrapToolStripMenuItem.Text = "&Word Wrap";
@@ -393,9 +391,7 @@
             // text
             // 
             this.text.AcceptsTab = true;
-            this.text.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
+            this.text.Dock = System.Windows.Forms.DockStyle.Fill;
             this.text.Font = new System.Drawing.Font("Consolas", 11F);
             this.text.HideSelection = false;
             this.text.Location = new System.Drawing.Point(0, 38);
