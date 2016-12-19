@@ -16,7 +16,8 @@ namespace betterpad
     public partial class Form1 : Form
     {
         private static Dictionary<Keys, Action> _shortcuts;
-        private readonly MemoryMappedFile _mmap = MemoryMappedFile.CreateOrOpen("{6472DD80-A7A5-4F44-BAD4-69BB7F9580DE}", 32);
+        private const int MmapSize = 32;
+        private readonly MemoryMappedFile _mmap = MemoryMappedFile.CreateOrOpen("{6472DD80-A7A5-4F44-BAD4-69BB7F9580DE}", MmapSize);
         private int _documentNumber;
         private string _path;
 
@@ -33,7 +34,7 @@ namespace betterpad
         {
             //purposely not disposing the mmap
             using (new ScopedMutex(true, "{8BED64DE-A2F9-408F-A223-92EDAD8D90E8}"))
-            using (var view = _mmap.CreateViewAccessor(0, 32))
+            using (var view = _mmap.CreateViewAccessor(0, MmapSize))
             {
                 _documentNumber = view.ReadInt32(0) + 1;
                 view.Write(0, _documentNumber);
