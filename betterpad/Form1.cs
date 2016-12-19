@@ -44,6 +44,7 @@ namespace betterpad
             InitializeShortcuts();
             InitializeMenuHandlers();
             InitializeLayout();
+            HookLocationDetection();
             GetDocumentNumber();
             SetTitle($"Untitled {_documentNumber}");
             _lastHash = DocumentHash;
@@ -159,6 +160,21 @@ namespace betterpad
         {
             redoToolStripMenuItem.Enabled = text.CanRedo;
             undoToolStripMenuItem.Enabled = text.CanUndo;
+        }
+
+        private void HookLocationDetection()
+        {
+            Action updateLocation = () =>
+            {
+                var line = text.GetLineFromCharIndex(text.SelectionStart);
+                var offset = text.SelectionStart - text.GetFirstCharIndexFromLine(line);
+                locationLabel.Text = $"Ln {line + 1},Col {offset + 1}"; //not zero-based :'(
+            };
+
+            text.MouseUp += (sender, args) => updateLocation();
+            text.KeyUp += (sender, args) => updateLocation();
+
+            updateLocation();
         }
 
         //File menu handlers
