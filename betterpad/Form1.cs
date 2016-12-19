@@ -101,9 +101,9 @@ namespace betterpad
                 //Edit menu
                 { undoToolStripMenuItem, text.Undo },
                 { redoToolStripMenuItem, text.Redo },
-                { cutToolStripMenuItem, text.Cut },
-                { copyToolStripMenuItem, text.Copy },
-                { pasteToolStripMenuItem, text.Paste },
+                { cutToolStripMenuItem, Cut },
+                { copyToolStripMenuItem, Copy },
+                { pasteToolStripMenuItem, Paste },
                 { deleteToolStripMenuItem, Delete },
                 { findToolStripMenuItem, Find },
                 { findNextToolStripMenuItem, FindNext },
