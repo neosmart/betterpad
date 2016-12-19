@@ -401,6 +401,7 @@
             this.text.Size = new System.Drawing.Size(1006, 676);
             this.text.TabIndex = 0;
             this.text.Text = "Hello, world!";
+            this.text.SelectionChanged += new System.EventHandler(this.text_SelectionChanged);
             this.text.TextChanged += new System.EventHandler(this.text_TextChanged);
             // 
             // Form1
@@ -414,6 +415,7 @@
             this.MainMenuStrip = this.menuStrip1;
             this.Name = "Form1";
             this.Text = "Betterpad by NeoSmart Technologies";
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.Form1_FormClosing);
             this.statusStrip1.ResumeLayout(false);
             this.statusStrip1.PerformLayout();
             this.menuStrip1.ResumeLayout(false);

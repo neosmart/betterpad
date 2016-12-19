@@ -37,6 +37,8 @@ namespace betterpad
             set { base.Multiline = true; }
         }
 
+        public bool TextSelected => SelectionLength > 0;
+
         [DllImport(@"User32.dll", EntryPoint = @"SendMessage", CharSet = CharSet.Auto)]
         private static extern int SendMessageRefRect(IntPtr hWnd, uint msg, int wParam, ref RECT rect);
 

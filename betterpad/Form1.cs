@@ -20,6 +20,23 @@ namespace betterpad
         private readonly MemoryMappedFile _mmap = MemoryMappedFile.CreateOrOpen("{6472DD80-A7A5-4F44-BAD4-69BB7F9580DE}", MmapSize);
         private int _documentNumber;
         private string _path;
+        private bool _ignoreChanges = false;
+
+        private unsafe byte[] DocumentHash
+        {
+            get
+            {
+                var bytes = new byte[sizeof(char) * text.Text.Length];
+                fixed (void* ptr = text.Text)
+                {
+                    System.Runtime.InteropServices.Marshal.Copy(new IntPtr(ptr), bytes, 0, bytes.Length);
+                }
+
+                MetroHash.MetroHash.Hash64_1(bytes, 0, (uint) bytes.Length, 0, out var hash);
+                return hash;
+            }
+        }
+        private byte[] _lastHash;
 
         public Form1()
         {
@@ -29,6 +46,7 @@ namespace betterpad
             InitializeMenuHandlers();
             GetDocumentNumber();
             SetTitle($"Untitled {_documentNumber}");
+            _lastHash = DocumentHash;
         }
 
         private void GetDocumentNumber()
@@ -114,6 +132,8 @@ namespace betterpad
         private void InitializeLayout()
         {
             text.Padding = new Padding(12, 10, 12, 10);
+            text_SelectionChanged(null, null);
+            text_TextChanged(null, null);
         }
 
         protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
@@ -137,17 +157,32 @@ namespace betterpad
         {
             redoToolStripMenuItem.Enabled = text.CanRedo;
             undoToolStripMenuItem.Enabled = text.CanUndo;
-            deleteToolStripMenuItem.Enabled = !string.IsNullOrEmpty(text.SelectedText);
         }
 
         //File menu handlers
         private void New()
         {
-            throw new NotImplementedException();
+            if (!UnsavedChanges())
+            {
+                return;
+            }
+
+            _ignoreChanges = true; //So Close() doesn't trigger another warning
+
+            Program.Restart = true;
+            Program.WindowSize = Size;
+            Program.WindowLocation = Location;
+
+            Close();
         }
 
         private void Open()
         {
+            if (!UnsavedChanges())
+            {
+                return;
+            }
+
             var dialog = new OpenFileDialog()
             {
                 AutoUpgradeEnabled = true,
@@ -189,6 +224,7 @@ namespace betterpad
 
             var data = File.ReadAllText(path);
             text.Text = data;
+            _lastHash = DocumentHash;
         }
 
         private bool Save()
@@ -221,6 +257,7 @@ namespace betterpad
         private void Save(string path)
         {
             File.WriteAllText(path, text.Text, Encoding.UTF8);
+            _lastHash = DocumentHash;
         }
 
         private void SaveAs()
@@ -321,6 +358,49 @@ namespace betterpad
         private void About()
         {
             throw new NotImplementedException();
+        }
+
+        private void text_SelectionChanged(Object sender, EventArgs e)
+        {
+            deleteToolStripMenuItem.Enabled = text.TextSelected;
+            cutToolStripMenuItem.Enabled = text.TextSelected;
+            copyToolStripMenuItem.Enabled = text.TextSelected;
+        }
+
+        private bool UnsavedChanges()
+        {
+            if (_ignoreChanges)
+            {
+                return true;
+            }
+
+            if (!Interop.ByteArrayCompare(DocumentHash, _lastHash))
+            {
+                var result = MessageBox.Show(this,
+                    "The document has unsaved changes. Do you want to save changes before exiting?", "Save changes?",
+                    MessageBoxButtons.YesNoCancel, MessageBoxIcon.Question);
+                if (result == DialogResult.Cancel)
+                {
+                    return false;
+                }
+                if (result == DialogResult.Yes)
+                {
+                    if (!Save())
+                    {
+                        return false;
+                    }
+                }
+            }
+
+            return true;
+        }
+
+        private void Form1_FormClosing(Object sender, FormClosingEventArgs e)
+        {
+            if (!UnsavedChanges())
+            {
+                e.Cancel = true;
+            }
         }
     }
 }
