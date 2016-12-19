@@ -18,6 +18,6 @@
 *.filters    text eol=crlf
 *.vcxitems   text eol=crlf
 
-*.cs         diff=csharp
+*.cs         diff=csharp eol=crlf
 *.resx       text merge=union eol=crlf
 
