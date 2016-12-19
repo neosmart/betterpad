@@ -26,6 +26,7 @@ namespace betterpad
             InitializeComponent();
             InitializeShortcuts();
             InitializeLayout();
+            InitializeMenuHandlers();
             GetDocumentNumber();
             SetTitle($"Untitled {_documentNumber}");
         }
@@ -48,7 +49,7 @@ namespace betterpad
                 //File menu
                 { Keys.Control | Keys.N, New },
                 { Keys.Control | Keys.O, Open },
-                { Keys.Control | Keys.S, Save },
+                { Keys.Control | Keys.S, () => { Save(); } },
                 { Keys.F12, SaveAs },
                 { Keys.Control | Keys.P, Print },
                 //Edit menu
@@ -73,8 +74,8 @@ namespace betterpad
                 //File menu
                 { newToolStripMenuItem, New },
                 { openToolStripMenuItem, Open },
-                { saveToolStripMenuItem, Save },
-                { saveToolStripMenuItem, SaveAs },
+                { saveToolStripMenuItem, () => { Save(); } },
+                { saveAsToolStripMenuItem, SaveAs },
                 { pageSetupToolStripMenuItem, PageSetup },
                 { printToolStripMenuItem, Print },
                 { exitToolStripMenuItem, Application.Exit },
@@ -190,7 +191,7 @@ namespace betterpad
             text.Text = data;
         }
 
-        private void Save()
+        private bool Save()
         {
             if (string.IsNullOrEmpty(_path))
             {
@@ -210,8 +211,11 @@ namespace betterpad
                 {
                     _path = dialog.FileName;
                     Save(_path);
+                    return true;
                 }
             }
+
+            return false;
         }
 
         private void Save(string path)
@@ -221,7 +225,12 @@ namespace betterpad
 
         private void SaveAs()
         {
-            throw new NotImplementedException();
+            var oldPath = _path;
+            _path = null;
+            if (!Save())
+            {
+                _path = oldPath;
+            }
         }
 
         private void PageSetup()
@@ -237,23 +246,33 @@ namespace betterpad
         //Edit menu handlers
         private void Cut()
         {
-            text.Cut();
+            Copy();
+            Delete();
         }
 
         private void Copy()
         {
-            text.Copy();
+            if (!string.IsNullOrEmpty(text.SelectedText))
+            {
+                Clipboard.SetText(text.SelectedText, TextDataFormat.UnicodeText);
+            }
         }
 
         private void Paste()
         {
-            //var data = Clipboard.GetText(TextDataFormat.UnicodeText);
             text.Paste(DataFormats.GetFormat(DataFormats.UnicodeText));
         }
 
         private void Delete()
         {
-            throw new NotImplementedException();
+            if (!string.IsNullOrEmpty(text.SelectedText))
+            {
+                var sb = new StringBuilder(text.TextLength - text.SelectionLength);
+                sb.Append(text.Text.Substring(0, text.SelectionStart));
+                sb.Append(text.Text.Substring(text.SelectionStart + text.SelectionLength));
+
+                text.Text = sb.ToString();
+            }
         }
 
         private void Find()
