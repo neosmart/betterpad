@@ -341,7 +341,7 @@ namespace betterpad
         //Format menu handlers
         private void WordWrap()
         {
-            throw new NotImplementedException();
+            text.WordWrap = wordWrapToolStripMenuItem.Checked;
         }
 
         private void ConfigureFont()
