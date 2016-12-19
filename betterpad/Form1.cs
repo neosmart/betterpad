@@ -45,13 +45,69 @@ namespace betterpad
         {
             _shortcuts = new Dictionary<Keys, Action>
             {
-                { Keys.Control | Keys.C, Copy },
-                { Keys.Control | Keys.V, Paste },
-                { Keys.Control | Keys.X, Cut },
-                { Keys.Control | Keys.F, Find },
+                //File menu
+                { Keys.Control | Keys.N, New },
                 { Keys.Control | Keys.O, Open },
                 { Keys.Control | Keys.S, Save },
+                { Keys.F12, SaveAs },
+                { Keys.Control | Keys.P, Print },
+                //Edit menu
+                { Keys.Control | Keys.X, Cut },
+                { Keys.Control | Keys.C, Copy },
+                { Keys.Control | Keys.V, Paste },
+                { Keys.Control | Keys.Y, text.Redo },
+                { Keys.Control | Keys.F, Find },
+                { Keys.F3, FindNext },
+                { Keys.Control | Keys.H, Replace },
+                { Keys.Control | Keys.G, GoTo },
+                { Keys.F5, TimeDate },
+                //Help menu
+                { Keys.F1, BetterpadHelp },
             };
+        }
+
+        private void InitializeMenuHandlers()
+        {
+            var handlers = new Dictionary<ToolStripMenuItem, Action>
+            {
+                //File menu
+                { newToolStripMenuItem, New },
+                { openToolStripMenuItem, Open },
+                { saveToolStripMenuItem, Save },
+                { saveToolStripMenuItem, SaveAs },
+                { pageSetupToolStripMenuItem, PageSetup },
+                { printToolStripMenuItem, Print },
+                { exitToolStripMenuItem, Application.Exit },
+                //Edit menu
+                { undoToolStripMenuItem, text.Undo },
+                { redoToolStripMenuItem, text.Redo },
+                { cutToolStripMenuItem, text.Cut },
+                { copyToolStripMenuItem, text.Copy },
+                { pasteToolStripMenuItem, text.Paste },
+                { deleteToolStripMenuItem, Delete },
+                { findToolStripMenuItem, Find },
+                { findNextToolStripMenuItem, FindNext },
+                { replaceToolStripMenuItem, Replace },
+                { goToToolStripMenuItem, GoTo },
+                { selectAllToolStripMenuItem, text.SelectAll },
+                { timeDateToolStripMenuItem, TimeDate },
+                //Format menu
+                { wordWrapToolStripMenuItem, WordWrap },
+                { fontToolStripMenuItem, ConfigureFont },
+                //View menu
+                { statusBarToolStripMenuItem, () => statusStrip1.Visible = statusBarToolStripMenuItem.Checked },
+                //Help menu
+                { viewHelpToolStripMenuItem, BetterpadHelp },
+                { aboutBetterpadToolStripMenuItem, About },
+            };
+
+            foreach (var menuItem in handlers.Keys)
+            {
+                menuItem.Click += (sender, args) =>
+                {
+                    handlers[menuItem]();
+                };
+            }
         }
 
         private void InitializeLayout()
@@ -71,26 +127,22 @@ namespace betterpad
             return base.ProcessCmdKey(ref msg, keyData);
         }
 
-        private void Find()
+        private void SetTitle(string document)
         {
-            var finder = new FindDialog();
-            finder.ShowDialog(this);
+            Text = $"{document} - Betterpad by NeoSmart Technologies";
         }
 
-        private void Paste()
+        private void text_TextChanged(Object sender, EventArgs e)
         {
-            //var data = Clipboard.GetText(TextDataFormat.UnicodeText);
-            text.Paste(DataFormats.GetFormat(DataFormats.UnicodeText));
+            redoToolStripMenuItem.Enabled = text.CanRedo;
+            undoToolStripMenuItem.Enabled = text.CanUndo;
+            deleteToolStripMenuItem.Enabled = !string.IsNullOrEmpty(text.SelectedText);
         }
 
-        private void Copy()
+        //File menu handlers
+        private void New()
         {
-            text.Copy();
-        }
-
-        private void Cut()
-        {
-            text.Cut();
+            throw new NotImplementedException();
         }
 
         private void Open()
@@ -167,9 +219,89 @@ namespace betterpad
             File.WriteAllText(path, text.Text, Encoding.UTF8);
         }
 
-        private void SetTitle(string document)
+        private void SaveAs()
         {
-            Text = $"{document} - Betterpad by NeoSmart Technologies";
+            throw new NotImplementedException();
+        }
+
+        private void PageSetup()
+        {
+            throw new NotImplementedException();
+        }
+
+        private void Print()
+        {
+            throw new NotImplementedException();
+        }
+
+        //Edit menu handlers
+        private void Cut()
+        {
+            text.Cut();
+        }
+
+        private void Copy()
+        {
+            text.Copy();
+        }
+
+        private void Paste()
+        {
+            //var data = Clipboard.GetText(TextDataFormat.UnicodeText);
+            text.Paste(DataFormats.GetFormat(DataFormats.UnicodeText));
+        }
+
+        private void Delete()
+        {
+            throw new NotImplementedException();
+        }
+
+        private void Find()
+        {
+            var finder = new FindDialog();
+            finder.ShowDialog(this);
+        }
+
+        private void FindNext()
+        {
+            throw new NotImplementedException();
+        }
+
+        private void Replace()
+        {
+            throw new NotImplementedException();
+        }
+
+        private void GoTo()
+        {
+            throw new NotImplementedException();
+        }
+
+        private void TimeDate()
+        {
+            throw new NotImplementedException();
+        }
+
+        //Format menu handlers
+        private void WordWrap()
+        {
+            throw new NotImplementedException();
+        }
+
+        private void ConfigureFont()
+        {
+            throw new NotImplementedException();
+        }
+
+        //Help menu handlers
+        private void BetterpadHelp()
+        {
+            throw new NotImplementedException();
+        }
+
+        private void About()
+        {
+            throw new NotImplementedException();
         }
     }
 }

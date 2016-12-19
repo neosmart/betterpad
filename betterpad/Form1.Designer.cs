@@ -367,6 +367,7 @@
             // viewHelpToolStripMenuItem
             // 
             this.viewHelpToolStripMenuItem.Name = "viewHelpToolStripMenuItem";
+            this.viewHelpToolStripMenuItem.ShortcutKeyDisplayString = "F1";
             this.viewHelpToolStripMenuItem.Size = new System.Drawing.Size(258, 34);
             this.viewHelpToolStripMenuItem.Text = "View &Help";
             // 
