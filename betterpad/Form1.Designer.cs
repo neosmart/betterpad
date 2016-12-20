@@ -71,6 +71,7 @@
             this.aboutBetterpadToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.contextMenuStrip1 = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.text = new betterpad.PaddedRichTextBox();
+            this.testbox = new System.Windows.Forms.Label();
             this.statusStrip1.SuspendLayout();
             this.menuStrip1.SuspendLayout();
             this.SuspendLayout();
@@ -97,7 +98,7 @@
             // toolStripStatusLabel2
             // 
             this.toolStripStatusLabel2.Name = "toolStripStatusLabel2";
-            this.toolStripStatusLabel2.Size = new System.Drawing.Size(731, 30);
+            this.toolStripStatusLabel2.Size = new System.Drawing.Size(785, 30);
             this.toolStripStatusLabel2.Spring = true;
             this.toolStripStatusLabel2.Text = "toolStripStatusLabel2";
             // 
@@ -141,58 +142,58 @@
             // 
             this.newToolStripMenuItem.Name = "newToolStripMenuItem";
             this.newToolStripMenuItem.ShortcutKeyDisplayString = "Ctrl+N";
-            this.newToolStripMenuItem.Size = new System.Drawing.Size(240, 34);
+            this.newToolStripMenuItem.Size = new System.Drawing.Size(231, 34);
             this.newToolStripMenuItem.Text = "&New";
             // 
             // openToolStripMenuItem
             // 
             this.openToolStripMenuItem.Name = "openToolStripMenuItem";
             this.openToolStripMenuItem.ShortcutKeyDisplayString = "Ctrl+O";
-            this.openToolStripMenuItem.Size = new System.Drawing.Size(240, 34);
+            this.openToolStripMenuItem.Size = new System.Drawing.Size(231, 34);
             this.openToolStripMenuItem.Text = "&Open";
             // 
             // saveToolStripMenuItem
             // 
             this.saveToolStripMenuItem.Name = "saveToolStripMenuItem";
             this.saveToolStripMenuItem.ShortcutKeyDisplayString = "Ctrl+S";
-            this.saveToolStripMenuItem.Size = new System.Drawing.Size(240, 34);
+            this.saveToolStripMenuItem.Size = new System.Drawing.Size(231, 34);
             this.saveToolStripMenuItem.Text = "&Save";
             // 
             // saveAsToolStripMenuItem
             // 
             this.saveAsToolStripMenuItem.Name = "saveAsToolStripMenuItem";
             this.saveAsToolStripMenuItem.ShortcutKeyDisplayString = "F12";
-            this.saveAsToolStripMenuItem.Size = new System.Drawing.Size(240, 34);
+            this.saveAsToolStripMenuItem.Size = new System.Drawing.Size(231, 34);
             this.saveAsToolStripMenuItem.Text = "Save &As";
             // 
             // toolStripSeparator4
             // 
             this.toolStripSeparator4.Name = "toolStripSeparator4";
-            this.toolStripSeparator4.Size = new System.Drawing.Size(237, 6);
+            this.toolStripSeparator4.Size = new System.Drawing.Size(228, 6);
             // 
             // pageSetupToolStripMenuItem
             // 
             this.pageSetupToolStripMenuItem.Name = "pageSetupToolStripMenuItem";
-            this.pageSetupToolStripMenuItem.Size = new System.Drawing.Size(240, 34);
+            this.pageSetupToolStripMenuItem.Size = new System.Drawing.Size(231, 34);
             this.pageSetupToolStripMenuItem.Text = "Page &Setup";
             // 
             // printToolStripMenuItem
             // 
             this.printToolStripMenuItem.Name = "printToolStripMenuItem";
             this.printToolStripMenuItem.ShortcutKeyDisplayString = "Ctrl+P";
-            this.printToolStripMenuItem.Size = new System.Drawing.Size(240, 34);
+            this.printToolStripMenuItem.Size = new System.Drawing.Size(231, 34);
             this.printToolStripMenuItem.Text = "&Print";
             // 
             // toolStripSeparator5
             // 
             this.toolStripSeparator5.Name = "toolStripSeparator5";
-            this.toolStripSeparator5.Size = new System.Drawing.Size(237, 6);
+            this.toolStripSeparator5.Size = new System.Drawing.Size(228, 6);
             // 
             // exitToolStripMenuItem
             // 
             this.exitToolStripMenuItem.Name = "exitToolStripMenuItem";
             this.exitToolStripMenuItem.ShortcutKeyDisplayString = "Alt+F4";
-            this.exitToolStripMenuItem.Size = new System.Drawing.Size(240, 34);
+            this.exitToolStripMenuItem.Size = new System.Drawing.Size(231, 34);
             this.exitToolStripMenuItem.Text = "E&xit";
             // 
             // editToolStripMenuItem
@@ -329,13 +330,13 @@
             // 
             this.wordWrapToolStripMenuItem.CheckOnClick = true;
             this.wordWrapToolStripMenuItem.Name = "wordWrapToolStripMenuItem";
-            this.wordWrapToolStripMenuItem.Size = new System.Drawing.Size(240, 34);
+            this.wordWrapToolStripMenuItem.Size = new System.Drawing.Size(211, 34);
             this.wordWrapToolStripMenuItem.Text = "&Word Wrap";
             // 
             // fontToolStripMenuItem
             // 
             this.fontToolStripMenuItem.Name = "fontToolStripMenuItem";
-            this.fontToolStripMenuItem.Size = new System.Drawing.Size(240, 34);
+            this.fontToolStripMenuItem.Size = new System.Drawing.Size(211, 34);
             this.fontToolStripMenuItem.Text = "&Font";
             // 
             // viewToolStripMenuItem
@@ -350,7 +351,7 @@
             // 
             this.statusBarToolStripMenuItem.CheckOnClick = true;
             this.statusBarToolStripMenuItem.Name = "statusBarToolStripMenuItem";
-            this.statusBarToolStripMenuItem.Size = new System.Drawing.Size(240, 34);
+            this.statusBarToolStripMenuItem.Size = new System.Drawing.Size(197, 34);
             this.statusBarToolStripMenuItem.Text = "&Status Bar";
             // 
             // helpToolStripMenuItem
@@ -401,6 +402,14 @@
             this.text.SelectionChanged += new System.EventHandler(this.text_SelectionChanged);
             this.text.TextChanged += new System.EventHandler(this.text_TextChanged);
             // 
+            // testbox
+            // 
+            this.testbox.AutoSize = true;
+            this.testbox.Location = new System.Drawing.Point(12, 137);
+            this.testbox.Name = "testbox";
+            this.testbox.Size = new System.Drawing.Size(0, 25);
+            this.testbox.TabIndex = 2;
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(11F, 24F);
@@ -409,6 +418,7 @@
             this.Controls.Add(this.text);
             this.Controls.Add(this.statusStrip1);
             this.Controls.Add(this.menuStrip1);
+            this.Controls.Add(this.testbox);
             this.MainMenuStrip = this.menuStrip1;
             this.Name = "Form1";
             this.Text = "Betterpad by NeoSmart Technologies";
@@ -466,6 +476,7 @@
         private System.Windows.Forms.ToolStripMenuItem viewHelpToolStripMenuItem;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator6;
         private System.Windows.Forms.ToolStripMenuItem aboutBetterpadToolStripMenuItem;
+        private System.Windows.Forms.Label testbox;
     }
 }
 

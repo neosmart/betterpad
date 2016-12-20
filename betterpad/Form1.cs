@@ -132,11 +132,25 @@ namespace betterpad
 
         private void InitializeLayout()
         {
-            text.Padding = new Padding(12, 10, 12, 10);
+            SetDefaultWidth();
+            text.Padding = new Padding(14, 10, 12, 10);
             text_SelectionChanged(null, null);
             text_TextChanged(null, null);
             statusBarToolStripMenuItem.PerformClick();
             wordWrapToolStripMenuItem.PerformClick();
+        }
+
+        private void SetDefaultWidth()
+        {
+            //These both return differing (and very wrong) answers on hi-dpi displays
+            //TextRender.MeasureText() is way too big while Graphics.MeasureString() is way too small
+            //Width = (int) (1.05 * TextRenderer.MeasureText(" ", text.Font).Width * 80);
+            //Width = (int)CreateGraphics().MeasureString(" ", text.Font).Width * 80;
+
+            //testbox is a technically hidden but officially a visible part of the form
+            testbox.Font = text.Font;
+            testbox.Text = "                                                                                  ";
+            Width = testbox.Width;
         }
 
         protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
