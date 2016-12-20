@@ -254,7 +254,7 @@ namespace betterpad
                 return;
             }
 
-            var data = File.ReadAllText(path);
+            var data = File.ReadAllText(path, Encoding.UTF8);
             text.Text = data;
             _lastHash = DocumentHash;
         }
