@@ -288,7 +288,7 @@ namespace betterpad
 
         private void Save(string path)
         {
-            File.WriteAllText(path, text.Text, Encoding.UTF8);
+            File.WriteAllText(path, text.Text, new UTF8Encoding(false));
             _lastHash = DocumentHash;
         }
 
