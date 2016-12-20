@@ -409,7 +409,7 @@ namespace betterpad
             if (!Interop.ByteArrayCompare(DocumentHash, _lastHash))
             {
                 var result = MessageBox.Show(this,
-                    "The document has unsaved changes. Do you want to save changes before exiting?", "Save changes?",
+                    "The document has unsaved changes. Do you want to save changes before closing?", "Save changes?",
                     MessageBoxButtons.YesNoCancel, MessageBoxIcon.Question);
                 if (result == DialogResult.Cancel)
                 {
