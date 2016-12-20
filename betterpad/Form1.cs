@@ -182,7 +182,7 @@ namespace betterpad
             {
                 var line = text.GetLineFromCharIndex(text.SelectionStart);
                 var offset = text.SelectionStart - text.GetFirstCharIndexFromLine(line);
-                locationLabel.Text = $"Ln {line + 1},Col {offset + 1}"; //not zero-based :'(
+                locationLabel.Text = $"Ln {line + 1}, Col {offset + 1}"; //not zero-based :'(
             };
 
             text.MouseUp += (sender, args) => updateLocation();
