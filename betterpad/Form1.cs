@@ -22,6 +22,7 @@ namespace betterpad
         private int _documentNumber;
         private string _path;
         private bool _ignoreChanges = false;
+        private string _processPath;
 
         private unsafe byte[] DocumentHash
         {
@@ -136,6 +137,11 @@ namespace betterpad
         private void InitializeLayout()
         {
             SetDefaultWidth();
+            using (var process = Process.GetCurrentProcess())
+            {
+                _processPath = process.MainModule.FileName;
+            }
+            Icon = Icon.ExtractAssociatedIcon(_processPath);
             text.Padding = new Padding(14, 10, 12, 10);
             text_SelectionChanged(null, null);
             text_TextChanged(null, null);
@@ -216,7 +222,7 @@ namespace betterpad
             //To-Do: convert to window management instead of process management
             using (var process = new Process()
             {
-                StartInfo = new ProcessStartInfo(Process.GetCurrentProcess().MainModule.FileName)
+                StartInfo = new ProcessStartInfo(_processPath)
             })
             {
                 process.Start();
