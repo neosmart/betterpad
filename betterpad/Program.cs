@@ -10,10 +10,6 @@ namespace betterpad
 {
     static class Program
     {
-        public static bool Restart;
-        public static Size WindowSize { get; set; }
-        public static Point WindowLocation { get; set; }
-
         /// <summary>
         /// The main entry point for the application.
         /// </summary>
@@ -26,24 +22,8 @@ namespace betterpad
             }
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            do
-            {
-                /*var newWindow = new Form1();
-                if (Restart)
-                {
-                    newWindow.StartPosition = FormStartPosition.Manual;
-                    newWindow.Location = WindowLocation;
-                    newWindow.Size = WindowSize;
-                }
-                Restart = false;
-                var thread = new Thread(() =>
-                {
-                    Application.Run(newWindow);
-                });
-                thread.Start();*/
-                var windowManager = new WindowManager();
-                //Application.Run();
-            } while (Restart);
+
+            new WindowManager();
         }
 
         [System.Runtime.InteropServices.DllImport("user32.dll")]

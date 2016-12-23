@@ -16,7 +16,7 @@ namespace betterpad
 {
     public partial class Form1 : Form
     {
-        private static Dictionary<Keys, Action> _shortcuts;
+        private Dictionary<Keys, Action> _shortcuts;
         private const int MmapSize = 32;
         private readonly MemoryMappedFile _mmap = MemoryMappedFile.CreateOrOpen("{6472DD80-A7A5-4F44-BAD4-69BB7F9580DE}", MmapSize);
         private int _documentNumber;
@@ -78,7 +78,7 @@ namespace betterpad
                 { Keys.Control | Keys.S, () => { Save(); } },
                 { Keys.F12, SaveAs },
                 { Keys.Control | Keys.P, Print },
-                { Keys.Control | Keys.W, Close },
+                { Keys.Control | Keys.W, Exit },
                 //Edit menu
                 { Keys.Control | Keys.X, Cut },
                 { Keys.Control | Keys.C, Copy },
@@ -165,18 +165,6 @@ namespace betterpad
             testbox.Font = text.Font;
             testbox.Text = "                                                                                  ";
             Width = testbox.Width;
-        }
-
-        protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
-        {
-            if (_shortcuts.TryGetValue(keyData, out var action))
-            {
-                action();
-                return true;
-            }
-
-            // Call the base class
-            return base.ProcessCmdKey(ref msg, keyData);
         }
 
         private void SetTitle(string document)
@@ -349,6 +337,16 @@ namespace betterpad
             throw new NotImplementedException();
         }
 
+        private void Exit()
+        {
+            if (!UnsavedChanges())
+            {
+                return;
+            }
+
+            Close();
+        }
+
         //Edit menu handlers
         private void Cut()
         {
@@ -476,6 +474,17 @@ namespace betterpad
         {
             //Run any actions queued by window manager
             StartAction?.Invoke(this);
+        }
+
+        protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
+        {
+            if (_shortcuts.TryGetValue(keyData, out var action))
+            {
+                action();
+                return true;
+            }
+
+            return base.ProcessCmdKey(ref msg, keyData);
         }
     }
 }
