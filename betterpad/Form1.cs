@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
+using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.IO.MemoryMappedFiles;
@@ -67,6 +68,7 @@ namespace betterpad
             {
                 //File menu
                 { Keys.Control | Keys.N, New },
+                { Keys.Control | Keys.Shift | Keys.N, NewWindow },
                 { Keys.Control | Keys.O, Open },
                 { Keys.Control | Keys.S, () => { Save(); } },
                 { Keys.F12, SaveAs },
@@ -92,6 +94,7 @@ namespace betterpad
             {
                 //File menu
                 { newToolStripMenuItem, New },
+                { newWindowToolStripMenuItem, NewWindow },
                 { openToolStripMenuItem, Open },
                 { saveToolStripMenuItem, () => { Save(); } },
                 { saveAsToolStripMenuItem, SaveAs },
@@ -206,6 +209,18 @@ namespace betterpad
             Program.WindowLocation = Location;
 
             Close();
+        }
+
+        private void NewWindow()
+        {
+            //To-Do: convert to window management instead of process management
+            using (var process = new Process()
+            {
+                StartInfo = new ProcessStartInfo(Process.GetCurrentProcess().MainModule.FileName)
+            })
+            {
+                process.Start();
+            }
         }
 
         private void Open()

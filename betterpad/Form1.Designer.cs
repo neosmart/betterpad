@@ -72,6 +72,7 @@
             this.contextMenuStrip1 = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.text = new betterpad.PaddedRichTextBox();
             this.testbox = new System.Windows.Forms.Label();
+            this.newWindowToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.statusStrip1.SuspendLayout();
             this.menuStrip1.SuspendLayout();
             this.SuspendLayout();
@@ -126,6 +127,7 @@
             // 
             this.fileToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.newToolStripMenuItem,
+            this.newWindowToolStripMenuItem,
             this.openToolStripMenuItem,
             this.saveToolStripMenuItem,
             this.saveAsToolStripMenuItem,
@@ -410,6 +412,13 @@
             this.testbox.Size = new System.Drawing.Size(0, 25);
             this.testbox.TabIndex = 2;
             // 
+            // newWindowToolStripMenuItem
+            // 
+            this.newWindowToolStripMenuItem.Name = "newWindowToolStripMenuItem";
+            this.newWindowToolStripMenuItem.ShortcutKeyDisplayString = "Ctrl+Shift+N";
+            this.newWindowToolStripMenuItem.Size = new System.Drawing.Size(360, 34);
+            this.newWindowToolStripMenuItem.Text = "New &Window";
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(11F, 24F);
@@ -477,6 +486,7 @@
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator6;
         private System.Windows.Forms.ToolStripMenuItem aboutBetterpadToolStripMenuItem;
         private System.Windows.Forms.Label testbox;
+        private System.Windows.Forms.ToolStripMenuItem newWindowToolStripMenuItem;
     }
 }
 
