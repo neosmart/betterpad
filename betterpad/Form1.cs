@@ -74,6 +74,7 @@ namespace betterpad
                 { Keys.Control | Keys.S, () => { Save(); } },
                 { Keys.F12, SaveAs },
                 { Keys.Control | Keys.P, Print },
+                { Keys.Control | Keys.W, Application.Exit },
                 //Edit menu
                 { Keys.Control | Keys.X, Cut },
                 { Keys.Control | Keys.C, Copy },
