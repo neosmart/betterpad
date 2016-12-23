@@ -38,6 +38,9 @@ namespace betterpad
                 return hash;
             }
         }
+
+        public Action<Form1> StartAction { get; internal set; }
+
         private byte[] _lastHash;
 
         public Form1()
@@ -71,6 +74,7 @@ namespace betterpad
                 { Keys.Control | Keys.N, New },
                 { Keys.Control | Keys.Shift | Keys.N, NewWindow },
                 { Keys.Control | Keys.O, Open },
+                { Keys.Control | Keys.Shift | Keys.O, OpenNew },
                 { Keys.Control | Keys.S, () => { Save(); } },
                 { Keys.F12, SaveAs },
                 { Keys.Control | Keys.P, Print },
@@ -211,23 +215,20 @@ namespace betterpad
 
             _ignoreChanges = true; //So Close() doesn't trigger another warning
 
-            Program.Restart = true;
-            Program.WindowSize = Size;
-            Program.WindowLocation = Location;
+            //set properties for new window
+            WindowManager.CreateNewWindow((form) =>
+            {
+                form.Size = Size;
+                form.StartPosition = FormStartPosition.Manual;
+                form.Location = Location;
+            });
 
             Close();
         }
 
         private void NewWindow()
         {
-            //To-Do: convert to window management instead of process management
-            using (var process = new Process()
-            {
-                StartInfo = new ProcessStartInfo(_processPath)
-            })
-            {
-                process.Start();
-            }
+            WindowManager.CreateNewWindow();
         }
 
         private void Open()
@@ -255,6 +256,20 @@ namespace betterpad
             {
                 Open(dialog.FileName);
             }
+        }
+
+        private void OpenNew()
+        {
+            WindowManager.CreateNewWindow((form) =>
+            {
+                form.Size = Size;
+                form.StartPosition = FormStartPosition.Manual;
+                form.Location = Location;
+            }, (form) =>
+            {
+                form.Focus();
+                form.Open();
+            });
         }
 
         private void Open(string path)
@@ -455,6 +470,12 @@ namespace betterpad
             {
                 e.Cancel = true;
             }
+        }
+
+        private void Form1_Shown(object sender, EventArgs e)
+        {
+            //Run any actions queued by window manager
+            StartAction?.Invoke(this);
         }
     }
 }

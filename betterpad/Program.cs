@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
@@ -27,7 +28,7 @@ namespace betterpad
             Application.SetCompatibleTextRenderingDefault(false);
             do
             {
-                var newWindow = new Form1();
+                /*var newWindow = new Form1();
                 if (Restart)
                 {
                     newWindow.StartPosition = FormStartPosition.Manual;
@@ -35,7 +36,13 @@ namespace betterpad
                     newWindow.Size = WindowSize;
                 }
                 Restart = false;
-                Application.Run(newWindow);
+                var thread = new Thread(() =>
+                {
+                    Application.Run(newWindow);
+                });
+                thread.Start();*/
+                var windowManager = new WindowManager();
+                //Application.Run();
             } while (Restart);
         }
 
