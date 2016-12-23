@@ -74,7 +74,7 @@ namespace betterpad
                 { Keys.Control | Keys.S, () => { Save(); } },
                 { Keys.F12, SaveAs },
                 { Keys.Control | Keys.P, Print },
-                { Keys.Control | Keys.W, Application.Exit },
+                { Keys.Control | Keys.W, Close },
                 //Edit menu
                 { Keys.Control | Keys.X, Cut },
                 { Keys.Control | Keys.C, Copy },
@@ -102,7 +102,7 @@ namespace betterpad
                 { saveAsToolStripMenuItem, SaveAs },
                 { pageSetupToolStripMenuItem, PageSetup },
                 { printToolStripMenuItem, Print },
-                { exitToolStripMenuItem, Application.Exit },
+                { exitToolStripMenuItem, Close },
                 //Edit menu
                 { undoToolStripMenuItem, text.Undo },
                 { redoToolStripMenuItem, text.Redo },
