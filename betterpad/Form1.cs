@@ -431,7 +431,17 @@ namespace betterpad
 
         private void ConfigureFont()
         {
-            throw new NotImplementedException();
+            using (var fontDialog = new FontDialog())
+            {
+                fontDialog.Font = text.Font;
+                fontDialog.FontMustExist = true;
+                fontDialog.AllowVectorFonts = true;
+                fontDialog.AllowVerticalFonts = false;
+                if (fontDialog.ShowDialog() == DialogResult.OK)
+                {
+                    text.Font = fontDialog.Font;
+                }
+            }
         }
 
         //Help menu handlers
