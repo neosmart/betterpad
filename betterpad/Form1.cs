@@ -66,6 +66,17 @@ namespace betterpad
             }
         }
 
+        private void DecrementDocumentNumber()
+        {
+            //purposely not disposing the mmap
+            using (new ScopedMutex(true, "{8BED64DE-A2F9-408F-A223-92EDAD8D90E8}"))
+            using (var view = _mmap.CreateViewAccessor(0, MmapSize))
+            {
+                _documentNumber = view.ReadInt32(0) - 1;
+                view.Write(0, _documentNumber);
+            }
+        }
+
         private void InitializeShortcuts()
         {
             _shortcuts = new Dictionary<Keys, Action>
@@ -221,10 +232,12 @@ namespace betterpad
 
         private void Open()
         {
-            if (!UnsavedChanges())
+            bool documentChanged = false;
+            if (!UnsavedChanges(ref documentChanged))
             {
                 return;
             }
+            documentChanged = documentChanged || !string.IsNullOrEmpty(_path) || text.Text != "";
 
             var dialog = new OpenFileDialog()
             {
@@ -243,6 +256,11 @@ namespace betterpad
             if (dialog.ShowDialog(this) == DialogResult.OK)
             {
                 Open(dialog.FileName);
+                //Decrement the document number IF no changes had been made AND no new document was created in the meantime
+                if (!documentChanged)
+                {
+                    DecrementDocumentNumber();
+                }
             }
         }
 
@@ -436,6 +454,12 @@ namespace betterpad
 
         private bool UnsavedChanges()
         {
+            bool documentChanged = false;
+            return UnsavedChanges(ref documentChanged);
+        }
+
+        private bool UnsavedChanges(ref bool documentChanged)
+        {
             if (_ignoreChanges)
             {
                 return true;
@@ -443,6 +467,7 @@ namespace betterpad
 
             if (!Interop.ByteArrayCompare(DocumentHash, _lastHash))
             {
+                documentChanged = true;
                 var result = MessageBox.Show(this,
                     "The document has unsaved changes. Do you want to save changes before closing?", "Save changes?",
                     MessageBoxButtons.YesNoCancel, MessageBoxIcon.Question);
