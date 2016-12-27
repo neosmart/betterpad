@@ -384,7 +384,7 @@ namespace betterpad
 
         private void Paste()
         {
-            throw new NotImplementedException();
+            text.Paste();
             //text.Paste(DataFormats.GetFormat(DataFormats.UnicodeText));
         }
 
