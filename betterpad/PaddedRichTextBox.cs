@@ -9,6 +9,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.IO;
+using System.Threading;
 
 namespace betterpad
 {
@@ -22,6 +23,9 @@ namespace betterpad
         private Stack<byte[]> _discardedUndos = new Stack<byte[]>(); //stores undos popped from undo buffer before a redo is made
         private Stack<byte[]> _redoBuffer = new Stack<byte[]>();
         private string _lastText => _lastBytesCompressed != null ? _encoding.GetString(Lz4Net.Lz4.DecompressBytes(_lastBytesCompressed)) : string.Empty;
+        private AutoResetEvent _snapshotSignal = new AutoResetEvent(false);
+        private ManualResetEvent _abortSignal = new ManualResetEvent(false);
+        private Thread _undoManager;
 
         public new Padding Padding
         {
@@ -39,19 +43,36 @@ namespace betterpad
             MaxLength = int.MaxValue;
             Multiline = true;
 
+            _undoManager = new Thread(() =>
+            {
+                var handles = new WaitHandle[] { _snapshotSignal, _abortSignal };
+                while (WaitHandle.WaitAny(handles) != 1)
+                {
+                    CreateUndo();
+                }
+            });
+            _undoManager.Start();
+
             //to-do: handle delete/backspace
             //store undos prior to paste and word/line breaks
             KeyDown += (sender, args) =>
             {
                 if (args.KeyData == Keys.Space || args.KeyData == Keys.Enter || args.KeyData == Keys.Tab)
                 {
-                    CreateUndo();
+                    SignalUndo();
                 }
             };
 
             //clear redo chain on text changed
             TextChanged += ClearRedoHandler;
-            CreateUndo();
+            SignalUndo();
+        }
+
+        protected override void OnHandleDestroyed(EventArgs e)
+        {
+            //intercept signal from parent on close
+            _abortSignal.Set();
+            base.OnHandleDestroyed(e);
         }
 
         private void ClearRedoHandler(object sender, EventArgs e)
@@ -61,16 +82,25 @@ namespace betterpad
 
         public new void Paste()
         {
-            CreateUndo();
+            SignalUndo();
             base.Paste();
         }
 
         private void ClearRedoTree()
         {
             if (_discardedUndos.Any())
-            _discardedUndos.Clear();
+            {
+                _discardedUndos.Clear();
+            }
             if (_redoBuffer.Any())
-            _redoBuffer.Clear();
+            {
+                _redoBuffer.Clear();
+            }
+        }
+
+        private void SignalUndo()
+        {
+            _snapshotSignal.Set();
         }
 
         //Generates a bsdiff to transform _current_ text to _previous_ text
@@ -78,6 +108,14 @@ namespace betterpad
         {
             var lastBytes = _lastBytesCompressed != null ? Lz4Net.Lz4.DecompressBytes(_lastBytesCompressed) : new byte[0];
             var utfBytes = _utfBytes;
+
+            //null check is to ensure new document snapshot is created
+            if (_undoBuffer.Any() && Interop.ByteArrayCompare(utfBytes, lastBytes))
+            {
+                //text hasn't changed
+                return;
+            }
+
             using (var diffStream = new MemoryStream())
             {
                 BsDiff.BinaryPatchUtility.Create(_utfBytes, lastBytes, diffStream);
@@ -181,6 +219,12 @@ namespace betterpad
             SelectionLength = 0;
             SelectionStart = Text.Length;
 
+            //Explicitly create an undo snapshot for when the text buffer is empty
+            if (Text.Length == 0)
+            {
+                SignalUndo();
+            }
+
             //re-subscribe to clear redo tree handler
             TextChanged += ClearRedoHandler;
         }
@@ -202,7 +246,7 @@ namespace betterpad
             {
                 BsDiff.BinaryPatchUtility.Apply(utfStream, () => new MemoryStream(patch), newStream);
                 var newBytes = newStream.ToArray();
-                _lastBytesCompressed = Lz4Net.Lz4.CompressBytes(utfBytes);
+                _lastBytesCompressed = utfBytes.Any() ? Lz4Net.Lz4.CompressBytes(utfBytes) : null;
                 Text = _encoding.GetString(newBytes);
             }
 
@@ -213,11 +257,16 @@ namespace betterpad
             }
             else
             {
-                CreateUndo();
+                //do we ever get here, anyway?
+                throw new Exception("This code is used, after all!");
+                SignalUndo();
             }
 
             //re-subscribe to clear redo tree handler
             TextChanged += ClearRedoHandler;
+
+            SelectionLength = 0;
+            SelectionStart = Text.Length;
         }
     }
 }
