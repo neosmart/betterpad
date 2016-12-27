@@ -218,6 +218,7 @@ namespace betterpad
             Text = _encoding.GetString(result);
             SelectionLength = 0;
             SelectionStart = Text.Length;
+            ScrollToCaret();
 
             //Explicitly create an undo snapshot for when the text buffer is empty
             if (Text.Length == 0)
@@ -267,6 +268,7 @@ namespace betterpad
 
             SelectionLength = 0;
             SelectionStart = Text.Length;
+            ScrollToCaret();
         }
     }
 }
