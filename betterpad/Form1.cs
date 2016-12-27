@@ -23,6 +23,7 @@ namespace betterpad
         private string _path;
         private bool _ignoreChanges = false;
         private string _processPath;
+        private Stack<byte[]> UndoStack = new Stack<byte[]>();
 
         private unsafe byte[] DocumentHash
         {
@@ -94,6 +95,7 @@ namespace betterpad
                 { Keys.Control | Keys.X, Cut },
                 { Keys.Control | Keys.C, Copy },
                 { Keys.Control | Keys.V, Paste },
+                { Keys.Control | Keys.Z, text.Undo },
                 { Keys.Control | Keys.Y, text.Redo },
                 { Keys.Control | Keys.F, Find },
                 { Keys.F3, FindNext },
@@ -382,7 +384,8 @@ namespace betterpad
 
         private void Paste()
         {
-            text.Paste(DataFormats.GetFormat(DataFormats.UnicodeText));
+            throw new NotImplementedException();
+            //text.Paste(DataFormats.GetFormat(DataFormats.UnicodeText));
         }
 
         private void Delete()
