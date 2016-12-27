@@ -17,7 +17,7 @@ namespace betterpad
     {
         private Padding _padding = Padding.Empty;
         private byte[] _lastBytesCompressed;
-        private Encoding _encoding = new UTF8Encoding(false);
+        private Encoding _encoding = Encoding.Unicode; //UTF8 conversion takes time
         private byte[] _utfBytes => _encoding.GetBytes(Text);
         private Stack<byte[]> _undoBuffer = new Stack<byte[]>();
         private Stack<byte[]> _discardedUndos = new Stack<byte[]>(); //stores undos popped from undo buffer before a redo is made
