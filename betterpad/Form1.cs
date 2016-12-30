@@ -135,7 +135,7 @@ namespace betterpad
                 { wordWrapToolStripMenuItem, WordWrap },
                 { fontToolStripMenuItem, ConfigureFont },
                 //View menu
-                { statusBarToolStripMenuItem, () => statusStrip1.Visible = statusBarToolStripMenuItem.Checked },
+                { statusBarToolStripMenuItem, StatusBar },
                 //Help menu
                 { viewHelpToolStripMenuItem, BetterpadHelp },
                 { aboutBetterpadToolStripMenuItem, About },
@@ -426,7 +426,14 @@ namespace betterpad
         //Format menu handlers
         private void WordWrap()
         {
+            wordWrapToolStripMenuItem.Checked = !wordWrapToolStripMenuItem.Checked;
             text.WordWrap = wordWrapToolStripMenuItem.Checked;
+        }
+
+        private void StatusBar()
+        {
+            statusBarToolStripMenuItem.Checked = !statusBarToolStripMenuItem.Checked;
+            statusStrip1.Visible = statusBarToolStripMenuItem.Checked;
         }
 
         private void ConfigureFont()
