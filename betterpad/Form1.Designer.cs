@@ -126,21 +126,25 @@
             // newWindowToolStripMenuItem
             // 
             this.newWindowToolStripMenuItem.Index = 0;
+            this.newWindowToolStripMenuItem.Shortcut = System.Windows.Forms.Shortcut.CtrlShiftN;
             this.newWindowToolStripMenuItem.Text = "New &Window";
             // 
             // openToolStripMenuItem
             // 
             this.openToolStripMenuItem.Index = 1;
+            this.openToolStripMenuItem.Shortcut = System.Windows.Forms.Shortcut.CtrlO;
             this.openToolStripMenuItem.Text = "&Open";
             // 
             // saveToolStripMenuItem
             // 
             this.saveToolStripMenuItem.Index = 2;
+            this.saveToolStripMenuItem.Shortcut = System.Windows.Forms.Shortcut.CtrlS;
             this.saveToolStripMenuItem.Text = "&Save";
             // 
             // saveAsToolStripMenuItem
             // 
             this.saveAsToolStripMenuItem.Index = 3;
+            this.saveAsToolStripMenuItem.Shortcut = System.Windows.Forms.Shortcut.CtrlShiftS;
             this.saveAsToolStripMenuItem.Text = "Save &As";
             // 
             // MenuItem4
@@ -156,6 +160,7 @@
             // printToolStripMenuItem
             // 
             this.printToolStripMenuItem.Index = 6;
+            this.printToolStripMenuItem.Shortcut = System.Windows.Forms.Shortcut.CtrlP;
             this.printToolStripMenuItem.Text = "&Print";
             // 
             // MenuItem5
@@ -166,6 +171,7 @@
             // exitToolStripMenuItem
             // 
             this.exitToolStripMenuItem.Index = 8;
+            this.exitToolStripMenuItem.Shortcut = System.Windows.Forms.Shortcut.AltF4;
             this.exitToolStripMenuItem.Text = "E&xit";
             // 
             // newToolStripMenuItem
@@ -197,11 +203,13 @@
             // undoToolStripMenuItem
             // 
             this.undoToolStripMenuItem.Index = 0;
+            this.undoToolStripMenuItem.Shortcut = System.Windows.Forms.Shortcut.CtrlZ;
             this.undoToolStripMenuItem.Text = "&Undo";
             // 
             // redoToolStripMenuItem
             // 
             this.redoToolStripMenuItem.Index = 1;
+            this.redoToolStripMenuItem.Shortcut = System.Windows.Forms.Shortcut.CtrlY;
             this.redoToolStripMenuItem.Text = "Redo";
             // 
             // MenuItem1
@@ -212,21 +220,25 @@
             // cutToolStripMenuItem
             // 
             this.cutToolStripMenuItem.Index = 3;
+            this.cutToolStripMenuItem.Shortcut = System.Windows.Forms.Shortcut.CtrlX;
             this.cutToolStripMenuItem.Text = "Cu&t";
             // 
             // copyToolStripMenuItem
             // 
             this.copyToolStripMenuItem.Index = 4;
+            this.copyToolStripMenuItem.Shortcut = System.Windows.Forms.Shortcut.CtrlC;
             this.copyToolStripMenuItem.Text = "&Copy";
             // 
             // pasteToolStripMenuItem
             // 
             this.pasteToolStripMenuItem.Index = 5;
+            this.pasteToolStripMenuItem.Shortcut = System.Windows.Forms.Shortcut.CtrlV;
             this.pasteToolStripMenuItem.Text = "&Paste";
             // 
             // deleteToolStripMenuItem
             // 
             this.deleteToolStripMenuItem.Index = 6;
+            this.deleteToolStripMenuItem.Shortcut = System.Windows.Forms.Shortcut.Del;
             this.deleteToolStripMenuItem.Text = "De&lete";
             // 
             // MenuItem2
@@ -237,21 +249,25 @@
             // findToolStripMenuItem
             // 
             this.findToolStripMenuItem.Index = 8;
+            this.findToolStripMenuItem.Shortcut = System.Windows.Forms.Shortcut.CtrlF;
             this.findToolStripMenuItem.Text = "&Find";
             // 
             // findNextToolStripMenuItem
             // 
             this.findNextToolStripMenuItem.Index = 9;
+            this.findNextToolStripMenuItem.Shortcut = System.Windows.Forms.Shortcut.F3;
             this.findNextToolStripMenuItem.Text = "Find &Next";
             // 
             // replaceToolStripMenuItem
             // 
             this.replaceToolStripMenuItem.Index = 10;
+            this.replaceToolStripMenuItem.Shortcut = System.Windows.Forms.Shortcut.CtrlH;
             this.replaceToolStripMenuItem.Text = "&Replace";
             // 
             // goToToolStripMenuItem
             // 
             this.goToToolStripMenuItem.Index = 11;
+            this.goToToolStripMenuItem.Shortcut = System.Windows.Forms.Shortcut.CtrlG;
             this.goToToolStripMenuItem.Text = "&Go To";
             // 
             // MenuItem3
@@ -262,11 +278,13 @@
             // selectAllToolStripMenuItem
             // 
             this.selectAllToolStripMenuItem.Index = 13;
+            this.selectAllToolStripMenuItem.Shortcut = System.Windows.Forms.Shortcut.CtrlA;
             this.selectAllToolStripMenuItem.Text = "Select &All";
             // 
             // timeDateToolStripMenuItem
             // 
             this.timeDateToolStripMenuItem.Index = 14;
+            this.timeDateToolStripMenuItem.Shortcut = System.Windows.Forms.Shortcut.F5;
             this.timeDateToolStripMenuItem.Text = "Time/&Date";
             // 
             // formatToolStripMenuItem
@@ -279,7 +297,6 @@
             // 
             // wordWrapToolStripMenuItem
             // 
-            this.wordWrapToolStripMenuItem.Checked = true;
             this.wordWrapToolStripMenuItem.Index = 0;
             this.wordWrapToolStripMenuItem.Text = "&Word Wrap";
             // 
@@ -297,7 +314,6 @@
             // 
             // statusBarToolStripMenuItem
             // 
-            this.statusBarToolStripMenuItem.Checked = true;
             this.statusBarToolStripMenuItem.Index = 0;
             this.statusBarToolStripMenuItem.Text = "&Status Bar";
             // 
