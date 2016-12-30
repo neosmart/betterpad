@@ -72,5 +72,24 @@ namespace betterpad
             RECT rc = new RECT(rect);
             SendMessageRefRect(Handle, EM_SETRECT, 0, ref rc);
         }
+
+        [DllImport("kernel32.dll", CharSet = CharSet.Auto)]
+        static extern IntPtr LoadLibrary(string lpFileName);
+
+        protected override CreateParams CreateParams
+        {
+            get
+            {
+                LoadLibrary("MsftEdit.dll");
+
+                //Use newer versions of the RTF control
+                //Fixes a lot of bugs, such as http://stackoverflow.com/q/41233421/17027
+                //A list of versions and their DLL paths can be found at https://github.com/dpradov/keynote-nf/issues/530
+                CreateParams createParams = base.CreateParams;
+                createParams.ClassName = "RichEdit50W";
+
+                return createParams;
+            }
+        }
     }
 }
