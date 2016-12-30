@@ -78,11 +78,11 @@
     </Compile>
     <Compile Include="Interop.cs" />
     <Compile Include="MetroHash64.cs" />
-    <Compile Include="PaddedRichTextBox.cs">
+    <Compile Include="BetterRichTextBox.cs">
       <SubType>Component</SubType>
     </Compile>
-    <Compile Include="PaddedRichTextBox.Designer.cs">
-      <DependentUpon>PaddedRichTextBox.cs</DependentUpon>
+    <Compile Include="BetterRichTextBox.Designer.cs">
+      <DependentUpon>BetterRichTextBox.cs</DependentUpon>
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -94,8 +94,8 @@
     <EmbeddedResource Include="Form1.resx">
       <DependentUpon>Form1.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="PaddedRichTextBox.resx">
-      <DependentUpon>PaddedRichTextBox.cs</DependentUpon>
+    <EmbeddedResource Include="BetterRichTextBox.resx">
+      <DependentUpon>BetterRichTextBox.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>

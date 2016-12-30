@@ -11,7 +11,7 @@ using System.Windows.Forms;
 
 namespace betterpad
 {
-    public partial class PaddedRichTextBox : RichTextBox
+    public partial class BetterRichTextBox : RichTextBox
     {
         private Padding _padding = Padding.Empty;
 
@@ -25,7 +25,7 @@ namespace betterpad
             }
         }
 
-        public PaddedRichTextBox()
+        public BetterRichTextBox()
         {
             InitializeComponent();
             Multiline = true;

@@ -1,6 +1,6 @@
 ﻿namespace betterpad
 {
-    partial class PaddedRichTextBox
+    partial class BetterRichTextBox
     {
         /// <summary>
         /// Required designer variable.
@@ -30,7 +30,7 @@
         {
             this.SuspendLayout();
             //
-            // PaddedRichTextBox
+            // BetterRichTextBox
             //
             this.Name = "PaddedRichTextBox";
             this.Size = new System.Drawing.Size(723, 531);

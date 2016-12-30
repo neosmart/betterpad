@@ -71,7 +71,7 @@
             this.MenuItem6 = new System.Windows.Forms.MenuItem();
             this.aboutBetterpadToolStripMenuItem = new System.Windows.Forms.MenuItem();
             this.contextMenuStrip1 = new System.Windows.Forms.ContextMenuStrip(this.components);
-            this.text = new betterpad.PaddedRichTextBox();
+            this.text = new betterpad.BetterRichTextBox();
             this.testbox = new System.Windows.Forms.Label();
             this.mainMenu1 = new System.Windows.Forms.MainMenu(this.components);
             this.statusStrip1.SuspendLayout();
@@ -411,7 +411,7 @@
         private System.Windows.Forms.MenuItem viewToolStripMenuItem;
         private System.Windows.Forms.MenuItem helpToolStripMenuItem;
         private System.Windows.Forms.ContextMenuStrip contextMenuStrip1;
-        private PaddedRichTextBox text;
+        private BetterRichTextBox text;
         private System.Windows.Forms.MenuItem newToolStripMenuItem;
         private System.Windows.Forms.MenuItem openToolStripMenuItem;
         private System.Windows.Forms.MenuItem saveToolStripMenuItem;
