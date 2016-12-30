@@ -30,8 +30,8 @@
         {
             this.components = new System.ComponentModel.Container();
             this.statusStrip1 = new System.Windows.Forms.StatusStrip();
-            this.toolStripStatusLabel1 = new System.Windows.Forms.ToolStripStatusLabel();
-            this.toolStripStatusLabel2 = new System.Windows.Forms.ToolStripStatusLabel();
+            this.lblStatus1 = new System.Windows.Forms.ToolStripStatusLabel();
+            this.lblStatus2 = new System.Windows.Forms.ToolStripStatusLabel();
             this.locationLabel = new System.Windows.Forms.ToolStripStatusLabel();
             this.menuStrip1 = new System.Windows.Forms.MainMenu(this.components);
             this.fileToolStripMenuItem = new System.Windows.Forms.MenuItem();
@@ -81,8 +81,8 @@
             // 
             this.statusStrip1.ImageScalingSize = new System.Drawing.Size(28, 28);
             this.statusStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.toolStripStatusLabel1,
-            this.toolStripStatusLabel2,
+            this.lblStatus1,
+            this.lblStatus2,
             this.locationLabel});
             this.statusStrip1.Location = new System.Drawing.Point(0, 714);
             this.statusStrip1.Name = "statusStrip1";
@@ -90,18 +90,18 @@
             this.statusStrip1.TabIndex = 0;
             this.statusStrip1.Text = "statusStrip1";
             // 
-            // toolStripStatusLabel1
+            // lblStatus1
             // 
-            this.toolStripStatusLabel1.Name = "toolStripStatusLabel1";
-            this.toolStripStatusLabel1.Size = new System.Drawing.Size(206, 30);
-            this.toolStripStatusLabel1.Text = "toolStripStatusLabel1";
+            this.lblStatus1.Name = "lblStatus1";
+            this.lblStatus1.Size = new System.Drawing.Size(102, 30);
+            this.lblStatus1.Text = "lblStatus1";
             // 
-            // toolStripStatusLabel2
+            // lblStatus2
             // 
-            this.toolStripStatusLabel2.Name = "toolStripStatusLabel2";
-            this.toolStripStatusLabel2.Size = new System.Drawing.Size(785, 30);
-            this.toolStripStatusLabel2.Spring = true;
-            this.toolStripStatusLabel2.Text = "toolStripStatusLabel2";
+            this.lblStatus2.Name = "lblStatus2";
+            this.lblStatus2.Size = new System.Drawing.Size(889, 30);
+            this.lblStatus2.Spring = true;
+            this.lblStatus2.Text = "lblStatus2";
             // 
             // locationLabel
             // 
@@ -401,9 +401,9 @@
         #endregion
 
         private System.Windows.Forms.StatusStrip statusStrip1;
-        private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabel1;
+        private System.Windows.Forms.ToolStripStatusLabel lblStatus1;
         private System.Windows.Forms.MainMenu menuStrip1;
-        private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabel2;
+        private System.Windows.Forms.ToolStripStatusLabel lblStatus2;
         private System.Windows.Forms.ToolStripStatusLabel locationLabel;
         private System.Windows.Forms.MenuItem fileToolStripMenuItem;
         private System.Windows.Forms.MenuItem editToolStripMenuItem;

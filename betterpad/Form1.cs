@@ -7,9 +7,8 @@ using System.Drawing;
 using System.IO;
 using System.IO.MemoryMappedFiles;
 using System.Linq;
+using System.Media;
 using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace betterpad
@@ -23,6 +22,10 @@ namespace betterpad
         private string _path;
         private bool _ignoreChanges = false;
         private string _processPath;
+        private FindDialog _finder;
+        private FindStatus _findStatus = new FindStatus();
+        private object _statusTimerLock = new object();
+        private Timer _statusTimer = null;
 
         private unsafe byte[] DocumentHash
         {
@@ -49,10 +52,23 @@ namespace betterpad
             InitializeShortcuts();
             InitializeMenuHandlers();
             InitializeLayout();
+            InitializeHandlers();
             HookLocationDetection();
             GetDocumentNumber();
             SetTitle($"Untitled {_documentNumber}");
             _lastHash = DocumentHash;
+            _finder = new FindDialog(text);
+        }
+
+        private void InitializeHandlers()
+        {
+        }
+
+        private void SelectionChangedFindHandler(object sender, EventArgs e)
+        {
+            _findStatus.FindCount = 0;
+            _findStatus.StartPosition = -1;
+            text.SelectionChanged -= SelectionChangedFindHandler;
         }
 
         private void GetDocumentNumber()
@@ -97,6 +113,7 @@ namespace betterpad
                 { Keys.Control | Keys.Y, text.Redo },
                 { Keys.Control | Keys.F, Find },
                 { Keys.F3, FindNext },
+                { Keys.Shift | Keys.F3, FindPrevious },
                 { Keys.Control | Keys.H, Replace },
                 { Keys.Control | Keys.G, GoTo },
                 { Keys.F5, TimeDate },
@@ -163,6 +180,8 @@ namespace betterpad
             text_TextChanged(null, null);
             statusBarToolStripMenuItem.PerformClick();
             wordWrapToolStripMenuItem.PerformClick();
+            lblStatus1.Text = string.Empty;
+            lblStatus2.Text = string.Empty;
         }
 
         private void SetDefaultWidth()
@@ -399,13 +418,90 @@ namespace betterpad
 
         private void Find()
         {
-            var finder = new FindDialog();
-            finder.ShowDialog(this);
+            _finder.SearchBox.SelectAll();
+            _finder.SearchBox.Focus();
+
+            var result = _finder.ShowDialog(this);
+            if (result == DialogResult.OK)
+            {
+                _findStatus.FindCount = 0;
+                _findStatus.SearchTerm = _finder.SearchTerm;
+                _findStatus.Options = _finder.Options;
+                _findStatus.StartPosition = text.SelectionStart + text.SelectionLength;
+                FindNext();
+            }
         }
 
         private void FindNext()
         {
-            throw new NotImplementedException();
+            if (_findStatus.Direction != FindStatus.SearchDirection.Forward)
+            {
+                _findStatus.Direction = FindStatus.SearchDirection.Forward;
+                _findStatus.FindCount = 0;
+                _findStatus.StartPosition = text.SelectionStart + text.SelectionLength;
+            }
+
+            Find(-1, false);
+        }
+
+        private void Find(int offset, bool reverse)
+        {
+            bool manualSearch = offset != -1;
+            if (string.IsNullOrEmpty(_findStatus.SearchTerm))
+            {
+                Find();
+                return;
+            }
+
+            text.SelectionChanged -= SelectionChangedFindHandler;
+
+            if (_findStatus.StartPosition == -1)
+            {
+                //user clicked away mid-search, we will begin searching from the current location
+                _findStatus.StartPosition = text.SelectionStart + text.SelectionLength;
+            }
+
+            offset = !manualSearch ? text.SelectionStart + text.SelectionLength : _findStatus.StartPosition;
+            var end = offset < _findStatus.StartPosition ? _findStatus.StartPosition - 1 : Math.Max(text.TextLength - 1, offset);
+            var index = text.Find(_findStatus.SearchTerm, offset, end, _findStatus.Options | (reverse ? RichTextBoxFinds.Reverse : RichTextBoxFinds.None));
+
+            if (index == -1 && offset >= _findStatus.StartPosition && _findStatus.StartPosition != 0)
+            {
+                //resume search from document start
+                index = text.Find(_findStatus.SearchTerm, 0, Math.Max(0, _findStatus.StartPosition - 1), _findStatus.Options | (reverse ? RichTextBoxFinds.Reverse : RichTextBoxFinds.None));
+            }
+
+            if (index != -1)
+            {
+                _findStatus.FindCount++;
+            }
+
+            if (_findStatus.FindCount != 0 && !manualSearch && index == -1)
+            {
+                _findStatus.FindCount = 0;
+                Find(0, reverse);
+                SystemSounds.Beep.Play();
+                SetStatus("No more results! Search restarted.", TimeSpan.FromMilliseconds(3000));
+            }
+            else if (_findStatus.FindCount == 0)
+            {
+                SystemSounds.Beep.Play();
+                SetStatus("No results found!", TimeSpan.FromMilliseconds(3000));
+            }
+
+            //Hook the selection changed event to allow restarting search from current position
+            text.SelectionChanged += SelectionChangedFindHandler;
+        }
+
+        private void FindPrevious()
+        {
+            if (_findStatus.Direction != FindStatus.SearchDirection.Reverse)
+            {
+                _findStatus.Direction = FindStatus.SearchDirection.Reverse;
+                _findStatus.FindCount = 0;
+                _findStatus.StartPosition = text.SelectionStart + text.SelectionLength;
+            }
+            Find(-1, true);
         }
 
         private void Replace()
@@ -527,6 +623,35 @@ namespace betterpad
             }
 
             return base.ProcessCmdKey(ref msg, keyData);
+        }
+
+        private void SetStatus(string message)
+        {
+            lblStatus1.Text = message;
+        }
+
+        private void SetStatus(string message, TimeSpan timeout)
+        {
+            SetStatus(message);
+
+            lock (_statusTimerLock)
+            {
+                //Make sure to cancel old timers
+                _statusTimer?.Stop();
+                _statusTimer?.Dispose();
+
+                _statusTimer = new Timer();
+                _statusTimer.Interval = (int) timeout.TotalMilliseconds;
+                _statusTimer.Tick += (s, e) =>
+                {
+                    Invoke((Action)(() =>
+                    {
+                        lblStatus1.Text = string.Empty;
+                        _statusTimer?.Dispose();
+                    }));
+                };
+                _statusTimer.Start();
+            }
         }
     }
 }
