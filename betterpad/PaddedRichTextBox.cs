@@ -91,5 +91,63 @@ namespace betterpad
                 return createParams;
             }
         }
+
+        //Uncomment to replace smooth scrolling with fixed 3-line scroll
+#if false
+        [DllImport("user32.dll")]
+        public static extern int SendMessage(IntPtr hWnd, int wMsg, int wParam, int lParam);
+
+        const int NULL = 0x00;
+        //Scroll and wheel messages
+        const int WM_HSCROLL = 0x0114;
+        const int WM_VSCROLL = 0x0115;
+        const int WM_MOUSEWHEEL = 0x020A;
+
+        //Scrollbar commands
+        const int SB_LINEUP = 0;
+        const int SB_LINELEFT = 0;
+        const int SB_LINEDOWN = 1;
+        const int SB_LINERIGHT = 1;
+        const int SB_PAGEUP = 2;
+        const int SB_PAGELEFT = 2;
+        const int SB_PAGEDOWN = 3;
+        const int SB_PAGERIGHT = 3;
+        const int SB_THUMBPOSITION = 4;
+        const int SB_THUMBTRACK = 5;
+        const int SB_TOP = 6;
+        const int SB_LEFT = 6;
+        const int SB_BOTTOM = 7;
+        const int SB_RIGHT = 7;
+        const int SB_ENDSCROLL = 8;
+        static short GET_WHEEL_DELTA_WPARAM(IntPtr wParam)
+        {
+            return (short)((int)wParam >> 16);
+        }
+        protected override void WndProc(ref Message m)
+        {
+            switch(m.Msg)
+            {
+                case WM_MOUSEWHEEL:
+                {
+                        if (GET_WHEEL_DELTA_WPARAM(m.WParam) > 0) // A positive value indicates that the wheel was rotated forward, away from the user;
+                        {
+                            SendMessage(Handle, WM_VSCROLL, SB_LINEUP, NULL);
+                            SendMessage(Handle, WM_VSCROLL, SB_LINEUP, NULL);
+                            SendMessage(Handle, WM_VSCROLL, SB_LINEUP, NULL);
+                        }
+                        else if (GET_WHEEL_DELTA_WPARAM(m.WParam) < 0) //A negative value indicates that the wheel was rotated backward, toward the user.
+                        {
+                            SendMessage(Handle, WM_VSCROLL, SB_LINEDOWN, NULL);
+                            SendMessage(Handle, WM_VSCROLL, SB_LINEDOWN, NULL);
+                            SendMessage(Handle, WM_VSCROLL, SB_LINEDOWN, NULL);
+                        }
+                        //return TRUE;  //block the message
+                        return;
+                }
+            }
+
+            base.WndProc(ref m);
+        }
+#endif
     }
 }
