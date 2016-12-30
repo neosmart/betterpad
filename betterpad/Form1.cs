@@ -107,7 +107,7 @@ namespace betterpad
 
         private void InitializeMenuHandlers()
         {
-            var handlers = new Dictionary<ToolStripMenuItem, Action>
+            var handlers = new Dictionary<MenuItem, Action>
             {
                 //File menu
                 { newToolStripMenuItem, New },
