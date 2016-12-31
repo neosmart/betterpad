@@ -293,29 +293,30 @@ namespace betterpad
 
         private void OpenNew()
         {
-            WindowManager.CreateNewWindow((form) =>
-            {
-                form.Size = Size;
-                form.StartPosition = FormStartPosition.Manual;
-                form.Location = Location;
-            }, (form) =>
-            {
-                form.Focus();
-                form.Open();
-            });
+            OpenNew(null, true);
         }
 
-        private void OpenNew(string path)
+        private void OpenNew(string path, bool sameLocation)
         {
             WindowManager.CreateNewWindow((form) =>
             {
                 form.Size = Size;
-                form.StartPosition = FormStartPosition.Manual;
-                form.Location = Location;
+                if (sameLocation)
+                {
+                    form.StartPosition = FormStartPosition.Manual;
+                    form.Location = Location;
+                }
             }, (form) =>
             {
                 form.Focus();
-                form.Open(path);
+                if (string.IsNullOrEmpty(path))
+                {
+                    form.Open();
+                }
+                else
+                {
+                    form.Open(path);
+                }
             });
         }
 
@@ -709,7 +710,7 @@ namespace betterpad
             {
                 if (replaceDocument)
                 {
-                    OpenNew(path);
+                    OpenNew(path, false);
                 }
                 else
                 {
