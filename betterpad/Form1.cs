@@ -26,6 +26,13 @@ namespace betterpad
         private FindStatus _findStatus = new FindStatus();
         private object _statusTimerLock = new object();
         private Timer _statusTimer = null;
+        private bool DocumentChanged
+        {
+            get
+            {
+                return Interop.ByteArrayCompare(DocumentHash, _lastHash) == false;
+            }
+        }
 
         private unsafe byte[] DocumentHash
         {
@@ -295,6 +302,20 @@ namespace betterpad
             {
                 form.Focus();
                 form.Open();
+            });
+        }
+
+        private void OpenNew(string path)
+        {
+            WindowManager.CreateNewWindow((form) =>
+            {
+                form.Size = Size;
+                form.StartPosition = FormStartPosition.Manual;
+                form.Location = Location;
+            }, (form) =>
+            {
+                form.Focus();
+                form.Open(path);
             });
         }
 
@@ -604,7 +625,7 @@ namespace betterpad
                 return true;
             }
 
-            if (!Interop.ByteArrayCompare(DocumentHash, _lastHash))
+            if (DocumentChanged)
             {
                 documentChanged = true;
                 var result = MessageBox.Show(this,
@@ -678,6 +699,29 @@ namespace betterpad
                 };
                 _statusTimer.Start();
             }
+        }
+
+        private void DragDropHandler(object sender, DragEventArgs e)
+        {
+            var replaceDocument = DocumentChanged && text.Text.Length == 0;
+            var paths = (string[])e.Data.GetData(DataFormats.FileDrop);
+            foreach (var path in paths)
+            {
+                if (replaceDocument)
+                {
+                    OpenNew(path);
+                }
+                else
+                {
+                    replaceDocument = true; //we can only replace one document
+                    Open(path);
+                }
+            }
+        }
+
+        private void DragDropBegin(object sender, DragEventArgs e)
+        {
+            e.Effect = DragDropEffects.Copy;
         }
     }
 }

@@ -380,6 +380,7 @@
             // 
             // Form1
             // 
+            this.AllowDrop = true;
             this.AutoScaleDimensions = new System.Drawing.SizeF(11F, 24F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1006, 749);
@@ -391,6 +392,9 @@
             this.Text = "Betterpad by NeoSmart Technologies";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.Form1_FormClosing);
             this.Shown += new System.EventHandler(this.Form1_Shown);
+            this.DragDrop += new System.Windows.Forms.DragEventHandler(this.DragDropHandler);
+            this.DragEnter += new System.Windows.Forms.DragEventHandler(this.DragDropBegin);
+            this.DragOver += new System.Windows.Forms.DragEventHandler(this.DragDropBegin);
             this.statusStrip1.ResumeLayout(false);
             this.statusStrip1.PerformLayout();
             this.ResumeLayout(false);
