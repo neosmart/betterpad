@@ -320,7 +320,7 @@ namespace betterpad
             });
         }
 
-        private void Open(string path)
+        public void Open(string path)
         {
             var dir = Path.GetDirectoryName(path);
             if (!Directory.Exists(dir))

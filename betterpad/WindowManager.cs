@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -11,7 +12,7 @@ namespace betterpad
     class WindowManager : ApplicationContext
     {
         private static List<Form1> _activeWindows = new List<Form1>();
-        private static Queue<Tuple<Action<Form1>, Action<Form1>>> WindowQueue = new Queue<Tuple<Action<Form1>, Action<Form1>>>();
+        private static Queue<Tuple<Action<Form1>, Action<Form1>>> WindowQueue = new Queue<Tuple<Action<Form1>, Action<Form1>>>(); //beforeShow, afterShow
         private static Semaphore CreateWindowEvent = new Semaphore(1, 256);
         private static ManualResetEvent AllWindowsClosed = new ManualResetEvent(false);
         private static ManualResetEvent CloseAll = new ManualResetEvent(false);
@@ -24,8 +25,35 @@ namespace betterpad
 
         public WindowManager()
         {
+            var args = Environment.GetCommandLineArgs().Skip(1);
+
+            foreach (var path in args)
+            {
+                if (!File.Exists(path))
+                {
+                    try
+                    {
+                        File.Create(path);
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show($"Error creating file at path {path}\r\n\r\n{ex.Message}", "Error opening file!", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        continue;
+                    }
+                }
+
+                WindowQueue.Enqueue(new Tuple<Action<Form1>, Action<Form1>>(null, (f) =>
+                {
+                    f.Open(path);
+                    f.Focus();
+                }));
+            }
+
             //new window handler for default entity
-            WindowQueue.Enqueue(new Tuple<Action<Form1>, Action<Form1>>(null, null));
+            if (!WindowQueue.Any())
+            {
+                WindowQueue.Enqueue(new Tuple<Action<Form1>, Action<Form1>>(null, null));
+            }
 
             var waitHandles = new WaitHandle [] { CreateWindowEvent, AllWindowsClosed, CloseAll };
             bool done = false;
