@@ -68,6 +68,7 @@ namespace betterpad
         {
             _findStatus.FindCount = 0;
             _findStatus.StartPosition = -1;
+            _findStatus.FirstResult = -1;
             text.SelectionChanged -= SelectionChangedFindHandler;
         }
 
@@ -428,25 +429,31 @@ namespace betterpad
                 _findStatus.SearchTerm = _finder.SearchTerm;
                 _findStatus.Options = _finder.Options;
                 _findStatus.StartPosition = text.SelectionStart + text.SelectionLength;
+                _findStatus.EndPosition = -1;
+                _findStatus.FirstResult = -1;
+                _findStatus.Direction = FindStatus.SearchDirection.Forward;
                 FindNext();
             }
         }
 
         private void FindNext()
         {
-            if (_findStatus.Direction != FindStatus.SearchDirection.Forward)
+            if (_findStatus.Direction != FindStatus.SearchDirection.Forward ||
+                _findStatus.StartPosition == -1)
             {
                 _findStatus.Direction = FindStatus.SearchDirection.Forward;
                 _findStatus.FindCount = 0;
+                _findStatus.FirstResult = -1;
                 _findStatus.StartPosition = text.SelectionStart + text.SelectionLength;
+                _findStatus.OriginalStartPosition = text.SelectionStart + text.SelectionLength;
+                _findStatus.EndPosition = -1;
             }
 
             Find(-1, false);
         }
 
-        private void Find(int offset, bool reverse)
+        private void Find(int end, bool reverse)
         {
-            bool manualSearch = offset != -1;
             if (string.IsNullOrEmpty(_findStatus.SearchTerm))
             {
                 Find();
@@ -455,38 +462,53 @@ namespace betterpad
 
             text.SelectionChanged -= SelectionChangedFindHandler;
 
-            if (_findStatus.StartPosition == -1)
+            var index = text.Find(_findStatus.SearchTerm, _findStatus.StartPosition, _findStatus.EndPosition, _findStatus.Options | (_findStatus.Direction == FindStatus.SearchDirection.Reverse ? RichTextBoxFinds.Reverse : RichTextBoxFinds.None));
+
+            if (index == -1 && _findStatus.Direction == FindStatus.SearchDirection.Forward && _findStatus.StartPosition != 0)
             {
-                //user clicked away mid-search, we will begin searching from the current location
-                _findStatus.StartPosition = text.SelectionStart + text.SelectionLength;
+                _findStatus.StartPosition = 0;
+                _findStatus.EndPosition = -1;
+                Find(end, reverse);
+                return;
+            }
+            else if (index == -1 && _findStatus.Direction == FindStatus.SearchDirection.Reverse && _findStatus.EndPosition <= _findStatus.OriginalStartPosition && _findStatus.EndPosition != -1)
+            {
+                _findStatus.StartPosition = _findStatus.OriginalStartPosition;
+                _findStatus.EndPosition = -1;
+                Find(end, reverse);
+                return;
             }
 
-            offset = !manualSearch ? text.SelectionStart + text.SelectionLength : _findStatus.StartPosition;
-            var end = offset < _findStatus.StartPosition ? _findStatus.StartPosition - 1 : Math.Max(text.TextLength - 1, offset);
-            var index = text.Find(_findStatus.SearchTerm, offset, end, _findStatus.Options | (reverse ? RichTextBoxFinds.Reverse : RichTextBoxFinds.None));
-
-            if (index == -1 && offset >= _findStatus.StartPosition && _findStatus.StartPosition != 0)
-            {
-                //resume search from document start
-                index = text.Find(_findStatus.SearchTerm, 0, Math.Max(0, _findStatus.StartPosition - 1), _findStatus.Options | (reverse ? RichTextBoxFinds.Reverse : RichTextBoxFinds.None));
-            }
-
-            if (index != -1)
-            {
-                _findStatus.FindCount++;
-            }
-
-            if (_findStatus.FindCount != 0 && !manualSearch && index == -1)
-            {
-                _findStatus.FindCount = 0;
-                Find(0, reverse);
-                SystemSounds.Beep.Play();
-                SetStatus("No more results! Search restarted.", TimeSpan.FromMilliseconds(3000));
-            }
-            else if (_findStatus.FindCount == 0)
+            if (index == -1)
             {
                 SystemSounds.Beep.Play();
                 SetStatus("No results found!", TimeSpan.FromMilliseconds(3000));
+            }
+            else if (index == _findStatus.FirstResult)
+            {
+                //Looped around
+                _findStatus.FindCount = 0;
+                _findStatus.StartPosition = _findStatus.Direction == FindStatus.SearchDirection.Forward ? _findStatus.OriginalStartPosition : 0;
+                _findStatus.EndPosition = _findStatus.Direction == FindStatus.SearchDirection.Forward ? -1 : _findStatus.OriginalStartPosition;
+                SystemSounds.Beep.Play();
+                SetStatus("No more results! Search restarted.", TimeSpan.FromMilliseconds(3000));
+            }
+            else if (_findStatus.FirstResult == -1)
+            {
+                _findStatus.FirstResult = index;
+            }
+
+            if (index != -1 && _findStatus.Direction == FindStatus.SearchDirection.Forward)
+            {
+                _findStatus.StartPosition = text.SelectionStart + text.SelectionLength;
+            }
+            else if (index != -1 && _findStatus.Direction == FindStatus.SearchDirection.Reverse)
+            {
+                _findStatus.EndPosition = text.SelectionStart - 1;
+                if (_findStatus.EndPosition < _findStatus.StartPosition)
+                {
+                    _findStatus.StartPosition = 0;
+                }
             }
 
             //Hook the selection changed event to allow restarting search from current position
@@ -495,11 +517,15 @@ namespace betterpad
 
         private void FindPrevious()
         {
-            if (_findStatus.Direction != FindStatus.SearchDirection.Reverse)
+            if (_findStatus.Direction != FindStatus.SearchDirection.Reverse ||
+                _findStatus.StartPosition == -1)
             {
                 _findStatus.Direction = FindStatus.SearchDirection.Reverse;
                 _findStatus.FindCount = 0;
-                _findStatus.StartPosition = text.SelectionStart + text.SelectionLength;
+                _findStatus.StartPosition = 0;
+                _findStatus.FirstResult = -1;
+                _findStatus.EndPosition = text.SelectionStart - 1;
+                _findStatus.OriginalStartPosition = text.SelectionStart;
             }
             Find(-1, true);
         }

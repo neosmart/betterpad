@@ -18,6 +18,9 @@ namespace betterpad
         public string SearchTerm;
         public RichTextBoxFinds Options;
         public int StartPosition;
+        public int OriginalStartPosition;
         public int FindCount = 0;
+        public int FirstResult = -1;
+        public int EndPosition;
     }
 }
