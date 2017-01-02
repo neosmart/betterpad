@@ -11,8 +11,14 @@ namespace betterpad
 {
     class WindowManager : ApplicationContext
     {
+        public struct NewFormActions
+        {
+            public Action<Form1> BeforeShow;
+            public Action<Form1> AfterShow;
+        }
+
         private static List<Form1> _activeWindows = new List<Form1>();
-        private static Queue<Tuple<Action<Form1>, Action<Form1>>> WindowQueue = new Queue<Tuple<Action<Form1>, Action<Form1>>>(); //beforeShow, afterShow
+        private static Queue<NewFormActions> WindowQueue = new Queue<NewFormActions>();
         private static Semaphore CreateWindowEvent = new Semaphore(1, 256);
         private static ManualResetEvent AllWindowsClosed = new ManualResetEvent(false);
         private static ManualResetEvent CloseAll = new ManualResetEvent(false);
@@ -42,17 +48,21 @@ namespace betterpad
                     }
                 }
 
-                WindowQueue.Enqueue(new Tuple<Action<Form1>, Action<Form1>>(null, (f) =>
+                var openAction = new NewFormActions()
                 {
-                    f.Open(path);
-                    f.Focus();
-                }));
+                    AfterShow = (f) =>
+                    {
+                        f.Open(path);
+                        f.Focus();
+                    }
+                };
+                WindowQueue.Enqueue(openAction);
             }
 
             //new window handler for default entity
             if (!WindowQueue.Any())
             {
-                WindowQueue.Enqueue(new Tuple<Action<Form1>, Action<Form1>>(null, null));
+                WindowQueue.Enqueue(new NewFormActions());
             }
 
             var waitHandles = new WaitHandle [] { CreateWindowEvent, AllWindowsClosed, CloseAll };
@@ -67,8 +77,8 @@ namespace betterpad
                             Interlocked.Increment(ref ThreadCounter);
                             var form = new Form1();
                             var handler = WindowQueue.Dequeue();
-                            handler.Item1?.Invoke(form);
-                            form.StartAction = handler.Item2;
+                            handler.BeforeShow?.Invoke(form);
+                            form.StartAction = handler.AfterShow;
                             form.ShowDialog();
                             if (Interlocked.Decrement(ref ThreadCounter) == 0)
                             {
@@ -88,9 +98,9 @@ namespace betterpad
             }
         }
 
-        public static void CreateNewWindow(Action<Form1> beforeShow = null, Action<Form1> afterShow = null)
+        public static void CreateNewWindow(NewFormActions actions = new NewFormActions())
         {
-            WindowQueue.Enqueue(new Tuple<Action<Form1>, Action<Form1>>(beforeShow, afterShow));
+            WindowQueue.Enqueue(actions);
             CreateWindowEvent.Release();
         }
     }

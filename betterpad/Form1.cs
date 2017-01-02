@@ -242,12 +242,16 @@ namespace betterpad
             _ignoreChanges = true; //So Close() doesn't trigger another warning
 
             //set properties for new window
-            WindowManager.CreateNewWindow((form) =>
+            var actions = new WindowManager.NewFormActions()
             {
-                form.Size = Size;
-                form.StartPosition = FormStartPosition.Manual;
-                form.Location = Location;
-            });
+                BeforeShow = (form) =>
+                {
+                    form.Size = Size;
+                    form.StartPosition = FormStartPosition.Manual;
+                    form.Location = Location;
+                }
+            };
+            WindowManager.CreateNewWindow(actions);
 
             Close();
         }
@@ -298,26 +302,31 @@ namespace betterpad
 
         private void OpenNew(string path, bool sameLocation)
         {
-            WindowManager.CreateNewWindow((form) =>
+            var actions = new WindowManager.NewFormActions()
             {
-                form.Size = Size;
-                if (sameLocation)
+                BeforeShow = (form) =>
                 {
-                    form.StartPosition = FormStartPosition.Manual;
-                    form.Location = Location;
-                }
-            }, (form) =>
-            {
-                form.Focus();
-                if (string.IsNullOrEmpty(path))
+                    form.Size = Size;
+                    if (sameLocation)
+                    {
+                        form.StartPosition = FormStartPosition.Manual;
+                        form.Location = Location;
+                    }
+                },
+                AfterShow = (form) =>
                 {
-                    form.Open();
+                    form.Focus();
+                    if (string.IsNullOrEmpty(path))
+                    {
+                        form.Open();
+                    }
+                    else
+                    {
+                        form.Open(path);
+                    }
                 }
-                else
-                {
-                    form.Open(path);
-                }
-            });
+            };
+            WindowManager.CreateNewWindow(actions);
         }
 
         public void Open(string path)
