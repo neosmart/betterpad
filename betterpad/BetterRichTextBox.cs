@@ -92,11 +92,32 @@ namespace betterpad
             }
         }
 
-        //Uncomment to replace smooth scrolling with fixed 3-line scroll
-#if false
         [DllImport("user32.dll")]
         public static extern int SendMessage(IntPtr hWnd, int wMsg, int wParam, int lParam);
 
+        private const int WM_USR = 0x400;
+        private const int EM_SETTEXTMODE = (WM_USR + 89);
+
+        public enum TEXTMODE
+        {
+            TM_PLAINTEXT = 1,
+            TM_RICHTEXT = 2
+        };
+
+        TEXTMODE _textMode = TEXTMODE.TM_RICHTEXT;
+        public TEXTMODE TextMode
+        {
+            get => _textMode;
+            set
+            {
+                _textMode = value;
+
+                SendMessage(this.Handle, EM_SETTEXTMODE, (int) value, 0);
+            }
+        }
+
+        //Uncomment to replace smooth scrolling with fixed 3-line scroll
+#if false
         const int NULL = 0x00;
         //Scroll and wheel messages
         const int WM_HSCROLL = 0x0114;
