@@ -18,55 +18,86 @@ namespace betterpad
         }
 
         private static List<Form1> _activeWindows = new List<Form1>();
+        public static IEnumerable<Form1> ActiveDocuments => _activeWindows;
         private static Queue<NewFormActions> WindowQueue = new Queue<NewFormActions>();
-        private static Semaphore CreateWindowEvent = new Semaphore(1, 256);
+        private static Semaphore CreateWindowEvent = new Semaphore(0, 256);
         private static ManualResetEvent AllWindowsClosed = new ManualResetEvent(false);
         private static ManualResetEvent CloseAll = new ManualResetEvent(false);
         private int ThreadCounter = 0;
+        private static RecoveryManager _recoveryManager = new RecoveryManager();
 
         private static void ThreadRunner()
         {
 
         }
 
+        static public void CreateDump()
+        {
+            _recoveryManager.CreateRecoveryData();
+        }
+
         public WindowManager()
         {
-            var args = Environment.GetCommandLineArgs().Skip(1);
+            var args = Environment.GetCommandLineArgs().Skip(1).ToArray();
 
-            foreach (var path in args)
+            //Create recovery manager
+            _recoveryManager.RegisterRecovery();
+
+            //Create a backup every x seconds for recovery purposes
+            var backupTimer = new System.Threading.Timer((o) =>
             {
-                if (!File.Exists(path))
-                {
-                    try
-                    {
-                        File.Create(path);
-                    }
-                    catch (Exception ex)
-                    {
-                        MessageBox.Show($"Error creating file at path {path}\r\n\r\n{ex.Message}", "Error opening file!", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                        continue;
-                    }
-                }
+                _recoveryManager.CreateRecoveryData();
+            }, null, 10 * 1000, 60 * 1000);
 
-                var openAction = new NewFormActions()
+            //Check if recovery needed
+            if (args.Length >= 2 && args[0] == "/recover")
+            {
+                var recoveryPath = args[1];
+                _recoveryManager.Recover(recoveryPath);
+            }
+            else
+            {
+                foreach (var path in args)
                 {
-                    AfterShow = (f) =>
+                    if (!File.Exists(path))
                     {
-                        f.Open(path);
-                        f.Focus();
+                        try
+                        {
+                            File.Create(path);
+                        }
+                        catch (Exception ex)
+                        {
+                            MessageBox.Show($"Error creating file at path {path}\r\n\r\n{ex.Message}", "Error opening file!", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            continue;
+                        }
                     }
-                };
-                WindowQueue.Enqueue(openAction);
+
+                    var openAction = new NewFormActions()
+                    {
+                        AfterShow = (f) =>
+                        {
+                            f.Open(path);
+                            f.Focus();
+                        }
+                    };
+                    WindowQueue.Enqueue(openAction);
+                }
             }
 
             //new window handler for default entity
             if (!WindowQueue.Any())
             {
                 WindowQueue.Enqueue(new NewFormActions());
+                CreateWindowEvent.Release();
             }
 
             var waitHandles = new WaitHandle [] { CreateWindowEvent, AllWindowsClosed, CloseAll };
             bool done = false;
+            AppDomain.CurrentDomain.ProcessExit += (sender, e) =>
+            {
+                while (!done) ;
+            };
+
             while (!done)
             {
                 switch (WaitHandle.WaitAny(waitHandles))
@@ -75,11 +106,16 @@ namespace betterpad
                         var thread = new Thread(() =>
                         {
                             Interlocked.Increment(ref ThreadCounter);
-                            var form = new Form1();
-                            var handler = WindowQueue.Dequeue();
-                            handler.BeforeShow?.Invoke(form);
-                            form.StartAction = handler.AfterShow;
-                            form.ShowDialog();
+                            if (WindowQueue.Any())
+                            {
+                                var form = new Form1();
+                                _activeWindows.Add(form);
+                                var handler = WindowQueue.Dequeue();
+                                handler.BeforeShow?.Invoke(form);
+                                form.StartAction = handler.AfterShow;
+                                form.ShowDialog();
+                                _activeWindows.Remove(form);
+                            }
                             if (Interlocked.Decrement(ref ThreadCounter) == 0)
                             {
                                 AllWindowsClosed.Set();

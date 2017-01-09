@@ -13,6 +13,18 @@ namespace betterpad
 {
     public partial class BetterRichTextBox : RichTextBox
     {
+        public BetterRichTextBox()
+        {
+            InitializeComponent();
+            Multiline = true;
+            //Cache the handle
+            Win32Handle = Handle;
+            HandleCreated += (s, e) =>
+            {
+                Win32Handle = Handle;
+            };
+        }
+
         private Padding _padding = Padding.Empty;
 
         public new Padding Padding
@@ -23,12 +35,6 @@ namespace betterpad
                 _padding = value;
                 SetPadding(this, _padding);
             }
-        }
-
-        public BetterRichTextBox()
-        {
-            InitializeComponent();
-            Multiline = true;
         }
 
         public sealed override bool Multiline
@@ -93,10 +99,11 @@ namespace betterpad
         }
 
         [DllImport("user32.dll")]
-        public static extern int SendMessage(IntPtr hWnd, int wMsg, int wParam, int lParam);
+        public static extern int SendMessage(IntPtr hWnd, uint wMsg, int wParam, int lParam);
 
-        private const int WM_USR = 0x400;
-        private const int EM_SETTEXTMODE = (WM_USR + 89);
+        //Ability to specify plain vs rich text mode
+        private const uint WM_USER = 0x400;
+        private const uint EM_SETTEXTMODE = (WM_USER + 89);
 
         public enum TEXTMODE
         {
@@ -112,7 +119,54 @@ namespace betterpad
             {
                 _textMode = value;
 
-                SendMessage(this.Handle, EM_SETTEXTMODE, (int) value, 0);
+                SendMessage(Win32Handle, EM_SETTEXTMODE, (int)value, 0);
+            }
+        }
+
+        //Cache the handle so we can bypass .NET thread ownership checks
+        public IntPtr Win32Handle { get; private set; }
+
+        //Bypass .NET threading checks and obtain text (used for recovery)
+        [DllImport("user32.dll", EntryPoint = "SendMessage", CharSet = CharSet.Auto)]
+        public static extern int SendMessage(IntPtr hWnd, uint Msg, int wParam, StringBuilder lParam);
+
+        const uint WM_GETTEXT = 0x000D;
+        const uint WM_GETTEXTLENGTH = 0x000E;
+
+        public string Win32Text
+        {
+            get
+            {
+                var sb = new StringBuilder();
+                Int32 size = SendMessage(Win32Handle, WM_GETTEXTLENGTH, 0, 0);
+
+                if (size > 0)
+                {
+                    sb.EnsureCapacity(size + 1);
+                    SendMessage(Win32Handle, WM_GETTEXT, sb.Capacity, sb);
+                }
+
+                return sb.ToString();
+            }
+        }
+
+        //Bypass .NET threading checks and obtain current caret location (used for recovery)
+        struct CHARRANGE
+        {
+            public int Start;
+            public int End;
+        }
+        const uint EM_EXGETSEL = WM_USER + 52;
+
+        [DllImport(@"User32.dll", EntryPoint = @"SendMessage", CharSet = CharSet.Auto)]
+        private static extern int SendMessage(IntPtr hWnd, uint msg, int wParam, out CHARRANGE selection);
+
+        public int Win32SelectionStart
+        {
+            get
+            {
+                SendMessage(Win32Handle, EM_EXGETSEL, 0, out CHARRANGE range);
+                return range.Start;
             }
         }
 

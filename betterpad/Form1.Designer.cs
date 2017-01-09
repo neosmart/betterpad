@@ -71,9 +71,9 @@
             this.MenuItem6 = new System.Windows.Forms.MenuItem();
             this.aboutBetterpadToolStripMenuItem = new System.Windows.Forms.MenuItem();
             this.contextMenuStrip1 = new System.Windows.Forms.ContextMenuStrip(this.components);
-            this.text = new betterpad.BetterRichTextBox();
             this.testbox = new System.Windows.Forms.Label();
             this.mainMenu1 = new System.Windows.Forms.MainMenu(this.components);
+            this.text = new betterpad.BetterRichTextBox();
             this.statusStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -84,7 +84,7 @@
             this.lblStatus1,
             this.lblStatus2,
             this.locationLabel});
-            this.statusStrip1.Location = new System.Drawing.Point(0, 714);
+            this.statusStrip1.Location = new System.Drawing.Point(0, 574);
             this.statusStrip1.Name = "statusStrip1";
             this.statusStrip1.Size = new System.Drawing.Size(1006, 35);
             this.statusStrip1.TabIndex = 0;
@@ -347,20 +347,6 @@
             this.contextMenuStrip1.Name = "contextMenuStrip1";
             this.contextMenuStrip1.Size = new System.Drawing.Size(80, 4);
             // 
-            // text
-            // 
-            this.text.AcceptsTab = true;
-            this.text.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.text.Font = new System.Drawing.Font("Consolas", 11F);
-            this.text.HideSelection = false;
-            this.text.Location = new System.Drawing.Point(0, 0);
-            this.text.Name = "text";
-            this.text.Size = new System.Drawing.Size(1006, 714);
-            this.text.TabIndex = 0;
-            this.text.Text = "";
-            this.text.SelectionChanged += new System.EventHandler(this.text_SelectionChanged);
-            this.text.TextChanged += new System.EventHandler(this.text_TextChanged);
-            // 
             // testbox
             // 
             this.testbox.AutoSize = true;
@@ -378,12 +364,27 @@
             this.viewToolStripMenuItem,
             this.helpToolStripMenuItem});
             // 
+            // text
+            // 
+            this.text.AcceptsTab = true;
+            this.text.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.text.Font = new System.Drawing.Font("Consolas", 11F);
+            this.text.HideSelection = false;
+            this.text.Location = new System.Drawing.Point(0, 0);
+            this.text.Name = "text";
+            this.text.Size = new System.Drawing.Size(1006, 574);
+            this.text.TabIndex = 0;
+            this.text.Text = "";
+            this.text.TextMode = betterpad.BetterRichTextBox.TEXTMODE.TM_PLAINTEXT;
+            this.text.SelectionChanged += new System.EventHandler(this.text_SelectionChanged);
+            this.text.TextChanged += new System.EventHandler(this.text_TextChanged);
+            // 
             // Form1
             // 
             this.AllowDrop = true;
             this.AutoScaleDimensions = new System.Drawing.SizeF(11F, 24F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1006, 749);
+            this.ClientSize = new System.Drawing.Size(1006, 609);
             this.Controls.Add(this.text);
             this.Controls.Add(this.statusStrip1);
             this.Controls.Add(this.testbox);
@@ -415,7 +416,6 @@
         private System.Windows.Forms.MenuItem viewToolStripMenuItem;
         private System.Windows.Forms.MenuItem helpToolStripMenuItem;
         private System.Windows.Forms.ContextMenuStrip contextMenuStrip1;
-        private BetterRichTextBox text;
         private System.Windows.Forms.MenuItem newToolStripMenuItem;
         private System.Windows.Forms.MenuItem openToolStripMenuItem;
         private System.Windows.Forms.MenuItem saveToolStripMenuItem;
@@ -449,6 +449,7 @@
         private System.Windows.Forms.Label testbox;
         private System.Windows.Forms.MenuItem newWindowToolStripMenuItem;
         private System.Windows.Forms.MainMenu mainMenu1;
+        private BetterRichTextBox text;
     }
 }
 

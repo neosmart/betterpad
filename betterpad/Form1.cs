@@ -19,13 +19,15 @@ namespace betterpad
         private const int MmapSize = 32;
         private readonly MemoryMappedFile _mmap = MemoryMappedFile.CreateOrOpen("{6472DD80-A7A5-4F44-BAD4-69BB7F9580DE}", MmapSize);
         private int _documentNumber;
-        private string _path;
+        public string FilePath { get; private set; }
         private bool _ignoreChanges = false;
         private string _processPath;
         private FindDialog _finder;
         private FindStatus _findStatus = new FindStatus();
         private object _statusTimerLock = new object();
         private Timer _statusTimer = null;
+        public BetterRichTextBox BetterBox => text;
+
         private bool DocumentChanged
         {
             get
@@ -268,7 +270,7 @@ namespace betterpad
             {
                 return;
             }
-            documentChanged = documentChanged || !string.IsNullOrEmpty(_path) || text.Text != "";
+            documentChanged = documentChanged || !string.IsNullOrEmpty(FilePath) || text.Text != "";
 
             var dialog = new OpenFileDialog()
             {
@@ -339,7 +341,7 @@ namespace betterpad
                 return;
             }
 
-            _path = path;
+            FilePath = path;
             SetTitle(Path.GetFileName(path));
 
             if (!File.Exists(path))
@@ -355,7 +357,7 @@ namespace betterpad
 
         private bool Save()
         {
-            if (string.IsNullOrEmpty(_path))
+            if (string.IsNullOrEmpty(FilePath))
             {
                 var dialog = new SaveFileDialog()
                 {
@@ -371,8 +373,8 @@ namespace betterpad
 
                 if (dialog.ShowDialog(this) == DialogResult.OK)
                 {
-                    _path = dialog.FileName;
-                    Save(_path);
+                    FilePath = dialog.FileName;
+                    Save(FilePath);
                     return true;
                 }
             }
@@ -388,11 +390,11 @@ namespace betterpad
 
         private void SaveAs()
         {
-            var oldPath = _path;
-            _path = null;
+            var oldPath = FilePath;
+            FilePath = null;
             if (!Save())
             {
-                _path = oldPath;
+                FilePath = oldPath;
             }
         }
 
