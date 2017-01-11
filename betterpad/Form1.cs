@@ -575,7 +575,8 @@ namespace betterpad
 
         private void TimeDate()
         {
-            throw new NotImplementedException();
+            var snippet = (DateTime.Now).ToString("h:mm tt M/d/yyyy");
+            text.Insert(snippet);
         }
 
         //Format menu handlers
