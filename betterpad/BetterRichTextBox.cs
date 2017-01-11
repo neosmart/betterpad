@@ -45,6 +45,17 @@ namespace betterpad
 
         public bool TextSelected => SelectionLength > 0;
 
+        private const int EM_REPLACESEL = 0x00C2;
+
+        [DllImport("user32.dll")]
+        public static extern int SendMessage(IntPtr hWnd, uint wMsg, int wParam, string lParam);
+
+        public void Insert(string newText)
+        {
+            SelectionLength = 0;
+            SendMessage(Handle, EM_REPLACESEL, 1, newText);
+        }
+
         [DllImport(@"User32.dll", EntryPoint = @"SendMessage", CharSet = CharSet.Auto)]
         private static extern int SendMessageRefRect(IntPtr hWnd, uint msg, int wParam, ref RECT rect);
 
