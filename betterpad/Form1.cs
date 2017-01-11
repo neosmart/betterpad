@@ -735,5 +735,15 @@ namespace betterpad
         {
             e.Effect = DragDropEffects.Copy;
         }
+
+        protected override void WndProc(ref Message m)
+        {
+            if (RecoveryManager.MessageHandler(ref m))
+            {
+                return;
+            }
+
+            base.WndProc(ref m);
+        }
     }
 }

@@ -84,7 +84,7 @@
             this.lblStatus1,
             this.lblStatus2,
             this.locationLabel});
-            this.statusStrip1.Location = new System.Drawing.Point(0, 574);
+            this.statusStrip1.Location = new System.Drawing.Point(0, 469);
             this.statusStrip1.Name = "statusStrip1";
             this.statusStrip1.Size = new System.Drawing.Size(1006, 35);
             this.statusStrip1.TabIndex = 0;
@@ -372,7 +372,7 @@
             this.text.HideSelection = false;
             this.text.Location = new System.Drawing.Point(0, 0);
             this.text.Name = "text";
-            this.text.Size = new System.Drawing.Size(1006, 574);
+            this.text.Size = new System.Drawing.Size(1006, 469);
             this.text.TabIndex = 0;
             this.text.Text = "";
             this.text.TextMode = betterpad.BetterRichTextBox.TEXTMODE.TM_PLAINTEXT;
@@ -384,7 +384,7 @@
             this.AllowDrop = true;
             this.AutoScaleDimensions = new System.Drawing.SizeF(11F, 24F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1006, 609);
+            this.ClientSize = new System.Drawing.Size(1006, 504);
             this.Controls.Add(this.text);
             this.Controls.Add(this.statusStrip1);
             this.Controls.Add(this.testbox);

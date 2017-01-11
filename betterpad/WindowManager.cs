@@ -80,15 +80,14 @@ namespace betterpad
                             f.Focus();
                         }
                     };
-                    WindowQueue.Enqueue(openAction);
+                    CreateNewWindow(openAction);
                 }
             }
 
             //new window handler for default entity
             if (!WindowQueue.Any())
             {
-                WindowQueue.Enqueue(new NewFormActions());
-                CreateWindowEvent.Release();
+                CreateNewWindow();
             }
 
             var waitHandles = new WaitHandle [] { CreateWindowEvent, AllWindowsClosed, CloseAll };
