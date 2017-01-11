@@ -84,7 +84,7 @@
             this.lblStatus1,
             this.lblStatus2,
             this.locationLabel});
-            this.statusStrip1.Location = new System.Drawing.Point(0, 469);
+            this.statusStrip1.Location = new System.Drawing.Point(0, 669);
             this.statusStrip1.Name = "statusStrip1";
             this.statusStrip1.Size = new System.Drawing.Size(1006, 35);
             this.statusStrip1.TabIndex = 0;
@@ -372,7 +372,7 @@
             this.text.HideSelection = false;
             this.text.Location = new System.Drawing.Point(0, 0);
             this.text.Name = "text";
-            this.text.Size = new System.Drawing.Size(1006, 469);
+            this.text.Size = new System.Drawing.Size(1006, 669);
             this.text.TabIndex = 0;
             this.text.Text = "";
             this.text.TextMode = betterpad.BetterRichTextBox.TEXTMODE.TM_PLAINTEXT;
@@ -384,13 +384,13 @@
             this.AllowDrop = true;
             this.AutoScaleDimensions = new System.Drawing.SizeF(11F, 24F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1006, 504);
+            this.ClientSize = new System.Drawing.Size(1006, 704);
             this.Controls.Add(this.text);
             this.Controls.Add(this.statusStrip1);
             this.Controls.Add(this.testbox);
             this.Menu = this.mainMenu1;
             this.Name = "Form1";
-            this.Text = "Betterpad by NeoSmart Technologies";
+            this.Text = "betterpad by NeoSmart Technologies";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.Form1_FormClosing);
             this.Shown += new System.EventHandler(this.Form1_Shown);
             this.DragDrop += new System.Windows.Forms.DragEventHandler(this.DragDropHandler);

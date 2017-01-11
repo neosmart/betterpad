@@ -209,7 +209,7 @@ namespace betterpad
 
         private void SetTitle(string document)
         {
-            Text = $"{document} - Betterpad by NeoSmart Technologies";
+            Text = $"{document} - betterpad by NeoSmart Technologies";
         }
 
         private void text_TextChanged(Object sender, EventArgs e)
@@ -615,7 +615,7 @@ namespace betterpad
 
         private void About()
         {
-            throw new NotImplementedException();
+            (new AboutDialog()).ShowDialog();
         }
 
         private void text_SelectionChanged(Object sender, EventArgs e)
@@ -734,7 +734,7 @@ namespace betterpad
 
         private void DragDropBegin(object sender, DragEventArgs e)
         {
-            e.Effect = DragDropEffects.Copy;
+            e.Effect = DragDropEffects.Move;
         }
 
         protected override void WndProc(ref Message m)

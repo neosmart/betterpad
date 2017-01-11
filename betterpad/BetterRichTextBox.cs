@@ -52,7 +52,7 @@ namespace betterpad
 
         public void Insert(string newText)
         {
-            SelectionLength = 0;
+            //SelectionLength = 0;
             SendMessage(Handle, EM_REPLACESEL, 1, newText);
         }
 
