@@ -163,17 +163,20 @@
             // 
             this.pageSetupToolStripMenuItem.Index = 6;
             this.pageSetupToolStripMenuItem.Text = "Page &Setup";
+            this.pageSetupToolStripMenuItem.Visible = false;
             // 
             // printToolStripMenuItem
             // 
             this.printToolStripMenuItem.Index = 7;
             this.printToolStripMenuItem.Shortcut = System.Windows.Forms.Shortcut.CtrlP;
             this.printToolStripMenuItem.Text = "&Print";
+            this.printToolStripMenuItem.Visible = false;
             // 
             // MenuItem5
             // 
             this.MenuItem5.Index = 8;
             this.MenuItem5.Text = "-";
+            this.MenuItem5.Visible = false;
             // 
             // exitToolStripMenuItem
             // 

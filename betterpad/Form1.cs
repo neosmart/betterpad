@@ -400,12 +400,10 @@ namespace betterpad
 
         private void PageSetup()
         {
-            throw new NotImplementedException();
         }
 
         private void Print()
         {
-            throw new NotImplementedException();
         }
 
         private void Exit()
