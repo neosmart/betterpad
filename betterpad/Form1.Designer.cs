@@ -35,6 +35,7 @@
             this.locationLabel = new System.Windows.Forms.ToolStripStatusLabel();
             this.menuStrip1 = new System.Windows.Forms.MainMenu(this.components);
             this.fileToolStripMenuItem = new System.Windows.Forms.MenuItem();
+            this.newToolStripMenuItem = new System.Windows.Forms.MenuItem();
             this.newWindowToolStripMenuItem = new System.Windows.Forms.MenuItem();
             this.openToolStripMenuItem = new System.Windows.Forms.MenuItem();
             this.saveToolStripMenuItem = new System.Windows.Forms.MenuItem();
@@ -44,7 +45,6 @@
             this.printToolStripMenuItem = new System.Windows.Forms.MenuItem();
             this.MenuItem5 = new System.Windows.Forms.MenuItem();
             this.exitToolStripMenuItem = new System.Windows.Forms.MenuItem();
-            this.newToolStripMenuItem = new System.Windows.Forms.MenuItem();
             this.editToolStripMenuItem = new System.Windows.Forms.MenuItem();
             this.undoToolStripMenuItem = new System.Windows.Forms.MenuItem();
             this.redoToolStripMenuItem = new System.Windows.Forms.MenuItem();
@@ -84,34 +84,36 @@
             this.lblStatus1,
             this.lblStatus2,
             this.locationLabel});
-            this.statusStrip1.Location = new System.Drawing.Point(0, 669);
+            this.statusStrip1.Location = new System.Drawing.Point(0, 338);
             this.statusStrip1.Name = "statusStrip1";
-            this.statusStrip1.Size = new System.Drawing.Size(1006, 35);
+            this.statusStrip1.Padding = new System.Windows.Forms.Padding(1, 0, 8, 0);
+            this.statusStrip1.Size = new System.Drawing.Size(549, 22);
             this.statusStrip1.TabIndex = 0;
             this.statusStrip1.Text = "statusStrip1";
             // 
             // lblStatus1
             // 
             this.lblStatus1.Name = "lblStatus1";
-            this.lblStatus1.Size = new System.Drawing.Size(102, 30);
+            this.lblStatus1.Size = new System.Drawing.Size(58, 17);
             this.lblStatus1.Text = "lblStatus1";
             // 
             // lblStatus2
             // 
             this.lblStatus2.Name = "lblStatus2";
-            this.lblStatus2.Size = new System.Drawing.Size(889, 30);
+            this.lblStatus2.Size = new System.Drawing.Size(482, 17);
             this.lblStatus2.Spring = true;
             this.lblStatus2.Text = "lblStatus2";
             // 
             // locationLabel
             // 
             this.locationLabel.Name = "locationLabel";
-            this.locationLabel.Size = new System.Drawing.Size(0, 30);
+            this.locationLabel.Size = new System.Drawing.Size(0, 17);
             // 
             // fileToolStripMenuItem
             // 
             this.fileToolStripMenuItem.Index = 0;
             this.fileToolStripMenuItem.MenuItems.AddRange(new System.Windows.Forms.MenuItem[] {
+            this.newToolStripMenuItem,
             this.newWindowToolStripMenuItem,
             this.openToolStripMenuItem,
             this.saveToolStripMenuItem,
@@ -123,61 +125,61 @@
             this.exitToolStripMenuItem});
             this.fileToolStripMenuItem.Text = "&File";
             // 
+            // newToolStripMenuItem
+            // 
+            this.newToolStripMenuItem.Index = 0;
+            this.newToolStripMenuItem.Text = "&New";
+            // 
             // newWindowToolStripMenuItem
             // 
-            this.newWindowToolStripMenuItem.Index = 0;
+            this.newWindowToolStripMenuItem.Index = 1;
             this.newWindowToolStripMenuItem.Shortcut = System.Windows.Forms.Shortcut.CtrlShiftN;
             this.newWindowToolStripMenuItem.Text = "New &Window";
             // 
             // openToolStripMenuItem
             // 
-            this.openToolStripMenuItem.Index = 1;
+            this.openToolStripMenuItem.Index = 2;
             this.openToolStripMenuItem.Shortcut = System.Windows.Forms.Shortcut.CtrlO;
             this.openToolStripMenuItem.Text = "&Open";
             // 
             // saveToolStripMenuItem
             // 
-            this.saveToolStripMenuItem.Index = 2;
+            this.saveToolStripMenuItem.Index = 3;
             this.saveToolStripMenuItem.Shortcut = System.Windows.Forms.Shortcut.CtrlS;
             this.saveToolStripMenuItem.Text = "&Save";
             // 
             // saveAsToolStripMenuItem
             // 
-            this.saveAsToolStripMenuItem.Index = 3;
+            this.saveAsToolStripMenuItem.Index = 4;
             this.saveAsToolStripMenuItem.Shortcut = System.Windows.Forms.Shortcut.CtrlShiftS;
             this.saveAsToolStripMenuItem.Text = "Save &As";
             // 
             // MenuItem4
             // 
-            this.MenuItem4.Index = 4;
+            this.MenuItem4.Index = 5;
             this.MenuItem4.Text = "-";
             // 
             // pageSetupToolStripMenuItem
             // 
-            this.pageSetupToolStripMenuItem.Index = 5;
+            this.pageSetupToolStripMenuItem.Index = 6;
             this.pageSetupToolStripMenuItem.Text = "Page &Setup";
             // 
             // printToolStripMenuItem
             // 
-            this.printToolStripMenuItem.Index = 6;
+            this.printToolStripMenuItem.Index = 7;
             this.printToolStripMenuItem.Shortcut = System.Windows.Forms.Shortcut.CtrlP;
             this.printToolStripMenuItem.Text = "&Print";
             // 
             // MenuItem5
             // 
-            this.MenuItem5.Index = 7;
+            this.MenuItem5.Index = 8;
             this.MenuItem5.Text = "-";
             // 
             // exitToolStripMenuItem
             // 
-            this.exitToolStripMenuItem.Index = 8;
+            this.exitToolStripMenuItem.Index = 9;
             this.exitToolStripMenuItem.Shortcut = System.Windows.Forms.Shortcut.AltF4;
             this.exitToolStripMenuItem.Text = "E&xit";
-            // 
-            // newToolStripMenuItem
-            // 
-            this.newToolStripMenuItem.Index = -1;
-            this.newToolStripMenuItem.Text = "&New";
             // 
             // editToolStripMenuItem
             // 
@@ -345,14 +347,15 @@
             // 
             this.contextMenuStrip1.ImageScalingSize = new System.Drawing.Size(28, 28);
             this.contextMenuStrip1.Name = "contextMenuStrip1";
-            this.contextMenuStrip1.Size = new System.Drawing.Size(80, 4);
+            this.contextMenuStrip1.Size = new System.Drawing.Size(61, 4);
             // 
             // testbox
             // 
             this.testbox.AutoSize = true;
-            this.testbox.Location = new System.Drawing.Point(12, 137);
+            this.testbox.Location = new System.Drawing.Point(7, 74);
+            this.testbox.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.testbox.Name = "testbox";
-            this.testbox.Size = new System.Drawing.Size(0, 25);
+            this.testbox.Size = new System.Drawing.Size(0, 13);
             this.testbox.TabIndex = 2;
             // 
             // mainMenu1
@@ -371,8 +374,9 @@
             this.text.Font = new System.Drawing.Font("Consolas", 11F);
             this.text.HideSelection = false;
             this.text.Location = new System.Drawing.Point(0, 0);
+            this.text.Margin = new System.Windows.Forms.Padding(2);
             this.text.Name = "text";
-            this.text.Size = new System.Drawing.Size(1006, 669);
+            this.text.Size = new System.Drawing.Size(549, 338);
             this.text.TabIndex = 0;
             this.text.Text = "";
             this.text.TextMode = betterpad.BetterRichTextBox.TEXTMODE.TM_PLAINTEXT;
@@ -382,12 +386,13 @@
             // Form1
             // 
             this.AllowDrop = true;
-            this.AutoScaleDimensions = new System.Drawing.SizeF(11F, 24F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1006, 704);
+            this.ClientSize = new System.Drawing.Size(549, 360);
             this.Controls.Add(this.text);
             this.Controls.Add(this.statusStrip1);
             this.Controls.Add(this.testbox);
+            this.Margin = new System.Windows.Forms.Padding(2);
             this.Menu = this.mainMenu1;
             this.Name = "Form1";
             this.Text = "betterpad by NeoSmart Technologies";
@@ -416,7 +421,6 @@
         private System.Windows.Forms.MenuItem viewToolStripMenuItem;
         private System.Windows.Forms.MenuItem helpToolStripMenuItem;
         private System.Windows.Forms.ContextMenuStrip contextMenuStrip1;
-        private System.Windows.Forms.MenuItem newToolStripMenuItem;
         private System.Windows.Forms.MenuItem openToolStripMenuItem;
         private System.Windows.Forms.MenuItem saveToolStripMenuItem;
         private System.Windows.Forms.MenuItem saveAsToolStripMenuItem;
@@ -450,6 +454,7 @@
         private System.Windows.Forms.MenuItem newWindowToolStripMenuItem;
         private System.Windows.Forms.MainMenu mainMenu1;
         private BetterRichTextBox text;
+        private System.Windows.Forms.MenuItem newToolStripMenuItem;
     }
 }
 
