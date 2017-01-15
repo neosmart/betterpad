@@ -97,6 +97,7 @@ namespace betterpad
             }
             catch { }
 
+            GC.Collect();
 
             if (!string.IsNullOrEmpty(_lastDumpDirectory))
             {
@@ -158,6 +159,7 @@ namespace betterpad
 
             try
             {
+                GC.Collect();
                 Directory.Delete(recoveryPath, true);
             }
             catch { }

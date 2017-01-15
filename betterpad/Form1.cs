@@ -354,6 +354,8 @@ namespace betterpad
             var data = File.ReadAllText(path, Encoding.UTF8);
             text.Text = data;
             _lastHash = DocumentHash;
+
+            GC.Collect();
         }
 
         private bool Save()
@@ -388,6 +390,8 @@ namespace betterpad
         {
             File.WriteAllText(path, text.Text, new UTF8Encoding(false));
             _lastHash = DocumentHash;
+
+            GC.Collect();
         }
 
         private void SaveAs()
