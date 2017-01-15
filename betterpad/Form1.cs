@@ -568,7 +568,29 @@ namespace betterpad
 
         private void GoTo()
         {
-            throw new NotImplementedException();
+            using (var gotoDialog = new GoToDialog())
+            {
+                do
+                {
+                    gotoDialog.StartPosition = FormStartPosition.CenterParent;
+                    var result = gotoDialog.ShowDialog(this);
+                    if (result == DialogResult.OK)
+                    {
+                        int line = text.GetFirstCharIndexFromLine(gotoDialog.LineNumber);
+                        if (line == -1)
+                        {
+                            SystemSounds.Beep.Play();
+                            gotoDialog.SelectAll();
+                            continue;
+                        }
+                        else
+                        {
+                            text.SelectionStart = line;
+                        }
+                    }
+                    break;
+                } while (true);
+            }
         }
 
         private void TimeDate()
@@ -598,7 +620,7 @@ namespace betterpad
                 fontDialog.FontMustExist = true;
                 fontDialog.AllowVectorFonts = true;
                 fontDialog.AllowVerticalFonts = false;
-                if (fontDialog.ShowDialog() == DialogResult.OK)
+                if (fontDialog.ShowDialog(this) == DialogResult.OK)
                 {
                     text.Font = fontDialog.Font;
                 }
@@ -613,7 +635,7 @@ namespace betterpad
 
         private void About()
         {
-            (new AboutDialog()).ShowDialog();
+            (new AboutDialog()).ShowDialog(this);
         }
 
         private void text_SelectionChanged(Object sender, EventArgs e)
