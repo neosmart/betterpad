@@ -107,13 +107,15 @@ namespace betterpad
                             Interlocked.Increment(ref ThreadCounter);
                             if (WindowQueue.Any())
                             {
-                                var form = new Form1();
-                                _activeWindows.Add(form);
-                                var handler = WindowQueue.Dequeue();
-                                handler.BeforeShow?.Invoke(form);
-                                form.StartAction = handler.AfterShow;
-                                form.ShowDialog();
-                                _activeWindows.Remove(form);
+                                using (var form = new Form1())
+                                {
+                                    _activeWindows.Add(form);
+                                    var handler = WindowQueue.Dequeue();
+                                    handler.BeforeShow?.Invoke(form);
+                                    form.StartAction = handler.AfterShow;
+                                    form.ShowDialog();
+                                    _activeWindows.Remove(form);
+                                }
                             }
                             if (Interlocked.Decrement(ref ThreadCounter) == 0)
                             {

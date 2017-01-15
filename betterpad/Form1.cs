@@ -272,7 +272,7 @@ namespace betterpad
             }
             documentChanged = documentChanged || !string.IsNullOrEmpty(FilePath) || text.Text != "";
 
-            var dialog = new OpenFileDialog()
+            using (var dialog = new OpenFileDialog()
             {
                 AutoUpgradeEnabled = true,
                 CheckFileExists = true,
@@ -284,15 +284,16 @@ namespace betterpad
                 ShowReadOnly = true,
                 ValidateNames = true,
                 Title = "Open file"
-            };
-
-            if (dialog.ShowDialog(this) == DialogResult.OK)
+            })
             {
-                Open(dialog.FileName);
-                //Decrement the document number IF no changes had been made AND no new document was created in the meantime
-                if (!documentChanged)
+                if (dialog.ShowDialog(this) == DialogResult.OK)
                 {
-                    DecrementDocumentNumber();
+                    Open(dialog.FileName);
+                    //Decrement the document number IF no changes had been made AND no new document was created in the meantime
+                    if (!documentChanged)
+                    {
+                        DecrementDocumentNumber();
+                    }
                 }
             }
         }
@@ -359,7 +360,7 @@ namespace betterpad
         {
             if (string.IsNullOrEmpty(FilePath))
             {
-                var dialog = new SaveFileDialog()
+                using (var dialog = new SaveFileDialog()
                 {
                     AddExtension = true,
                     AutoUpgradeEnabled = true,
@@ -369,13 +370,14 @@ namespace betterpad
                     RestoreDirectory = true,
                     Title = "Save file",
                     Filter = "Text Files (*.txt)|*.txt|Log Files (*.log)|*.log"
-                };
-
-                if (dialog.ShowDialog(this) == DialogResult.OK)
+                })
                 {
-                    FilePath = dialog.FileName;
-                    Save(FilePath);
-                    return true;
+                    if (dialog.ShowDialog(this) == DialogResult.OK)
+                    {
+                        FilePath = dialog.FileName;
+                        Save(FilePath);
+                        return true;
+                    }
                 }
             }
 
@@ -635,7 +637,10 @@ namespace betterpad
 
         private void About()
         {
-            (new AboutDialog()).ShowDialog(this);
+            using (var dialog = new AboutDialog())
+            {
+                dialog.ShowDialog(this);
+            }
         }
 
         private void text_SelectionChanged(Object sender, EventArgs e)
@@ -765,6 +770,22 @@ namespace betterpad
             }
 
             base.WndProc(ref m);
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                if (components != null)
+                {
+                    components.Dispose();
+                }
+
+                //Own dispose code
+                _finder.Dispose();
+            }
+
+            base.Dispose(disposing);
         }
     }
 }
