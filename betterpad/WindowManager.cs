@@ -67,8 +67,15 @@ namespace betterpad
                         }
                         catch (Exception ex)
                         {
-                            MessageBox.Show($"Error creating file at path {path}\r\n\r\n{ex.Message}", "Error opening file!", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                            continue;
+                            var result = MessageBox.Show($"Error creating file at path {path}\r\n\r\n{ex.Message}", "Error opening file!", MessageBoxButtons.OKCancel, MessageBoxIcon.Error);
+                            if (result == DialogResult.OK)
+                            {
+                                continue;
+                            }
+                            else
+                            {
+                                break;
+                            }
                         }
                     }
 
