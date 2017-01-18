@@ -55,6 +55,10 @@ namespace betterpad
                 var recoveryPath = args[1];
                 _recoveryManager.Recover(recoveryPath);
             }
+            else if (_recoveryManager.UnsafeShutdown)
+            {
+                _recoveryManager.Recover(_recoveryManager.UnsafeShutdownPath);
+            }
             else
             {
                 foreach (var path in args)
@@ -97,7 +101,7 @@ namespace betterpad
                 CreateNewWindow();
             }
 
-            var waitHandles = new WaitHandle [] { CreateWindowEvent, AllWindowsClosed, CloseAll };
+            var waitHandles = new WaitHandle[] { CreateWindowEvent, AllWindowsClosed, CloseAll };
             bool done = false;
             AppDomain.CurrentDomain.ProcessExit += (sender, e) =>
             {
@@ -138,6 +142,19 @@ namespace betterpad
                     case 2:
                         done = true;
                         break;
+                }
+            }
+
+            //Delete the unsafe shutdown folder if this is a clean shutdown
+            if (!RecoveryManager.ShutdownInitiated && Directory.Exists(_recoveryManager.UnsafeShutdownPath))
+            {
+                try
+                {
+                    Directory.Delete(_recoveryManager.UnsafeShutdownPath, true);
+                }
+                catch { }
+                {
+
                 }
             }
         }

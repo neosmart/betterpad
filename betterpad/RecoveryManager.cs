@@ -5,6 +5,7 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
@@ -13,6 +14,8 @@ namespace betterpad
     class RecoveryManager
     {
         private string _lastDumpDirectory = null;
+        public static bool ShutdownInitiated { get; private set; }
+        public static ManualResetEventSlim ShutdownDumpComplete = new ManualResetEventSlim(false);
 
         [DllImport("kernel32.dll")]
         static extern uint RegisterApplicationRecoveryCallback(IntPtr pRecoveryCallback, IntPtr pvParameter, int dwPingInterval, int dwFlags);
@@ -26,6 +29,13 @@ namespace betterpad
         [DllImport("kernel32.dll", SetLastError = true)]
         static extern int RegisterApplicationRestart([MarshalAs(UnmanagedType.LPWStr)] string commandLineArgs, int Flags);
 
+        static int SM_SHUTTINGDOWN = 0x2000;
+
+        [DllImport("user32.dll")]
+        static extern bool GetSystemMetrics(int metric);
+
+        public static bool ShutdownInProgress => GetSystemMetrics(SM_SHUTTINGDOWN) || ShutdownInitiated;
+
         delegate int ApplicationRecoveryCallback(IntPtr pvParameter);
 
         public void RegisterRecovery()
@@ -38,14 +48,25 @@ namespace betterpad
 
         public int CreateRecoveryData()
         {
-            return CreateRecoveryData(IntPtr.Zero);
+            return CreateRecoveryData(null);
         }
 
         public int CreateRecoveryData(IntPtr param)
         {
+            return CreateRecoveryData();
+        }
+
+        public int CreateRecoveryData(string path)
+        {
+            //Protect against automated/other dumps when a shutdown dump has been triggered
+            if (ShutdownInitiated && string.IsNullOrWhiteSpace(path))
+            {
+                return 0;
+            }
+
             try
             {
-                var tempDir = Path.Combine(Path.GetTempPath(), "betterpad-" + Path.GetRandomFileName());
+                var tempDir = path ?? Path.Combine(Path.GetTempPath(), "betterpad-" + Path.GetRandomFileName());
                 if (!Directory.Exists(tempDir))
                 {
                     Directory.CreateDirectory(tempDir);
@@ -167,16 +188,46 @@ namespace betterpad
             return true;
         }
 
+        public string UnsafeShutdownPath
+        {
+            get
+            {
+                return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "NeoSmart Technologies", Path.GetFileNameWithoutExtension(Application.ExecutablePath), "unsafe-recovery");
+            }
+        }
+
+        public bool UnsafeShutdown => Directory.Exists(UnsafeShutdownPath);
+
         const int WM_QUERYENDSESSION = 0x11;
         const int ENDSESSION_CLOSEAPP = 1;
         const int WM_ENDSESSION = 22;
 
         public static bool MessageHandler(ref Message m)
         {
-            if (m.Msg == WM_QUERYENDSESSION || m.Msg == WM_ENDSESSION)
+            if (m.Msg == WM_ENDSESSION || (m.Msg == WM_QUERYENDSESSION && ShutdownInitiated))
             {
                 m.Result = new IntPtr(ENDSESSION_CLOSEAPP);
                 return true;
+            }
+            else if (m.Msg == WM_QUERYENDSESSION)
+            {
+                //system getting ready to shut down
+                //individual *forms* receive this message, so we must protect against a race condition
+                using (var shutdownMutex = new ScopedMutex("{EA433526-9724-43FD-B175-6EA7BA7517A4}"))
+                {
+                    if (ShutdownInitiated)
+                    {
+                        m.Result = new IntPtr(ENDSESSION_CLOSEAPP);
+                        return true;
+                    }
+
+                    ShutdownInitiated = true;
+                    var recoveryMan = new RecoveryManager();
+                    recoveryMan.CreateRecoveryData(recoveryMan.UnsafeShutdownPath);
+                    RecoveryManager.ShutdownDumpComplete.Set();
+                    m.Result = new IntPtr(ENDSESSION_CLOSEAPP);
+                    return true;
+                }
             }
 
             return false;

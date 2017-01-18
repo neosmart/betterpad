@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.Win32;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -664,6 +665,12 @@ namespace betterpad
         {
             if (_ignoreChanges)
             {
+                return true;
+            }
+
+            if (RecoveryManager.ShutdownInProgress)
+            {
+                RecoveryManager.ShutdownDumpComplete.Wait();
                 return true;
             }
 
