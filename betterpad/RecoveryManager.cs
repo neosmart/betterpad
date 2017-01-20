@@ -110,6 +110,7 @@ namespace betterpad
                 {
                     try
                     {
+
                         Directory.Delete(_lastDumpDirectory, true);
                     }
                     catch { }

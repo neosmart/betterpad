@@ -297,6 +297,7 @@ namespace betterpad
                     }
                 }
             }
+            GC.Collect();
         }
 
         private void OpenNew()
@@ -382,6 +383,7 @@ namespace betterpad
                         return true;
                     }
                 }
+                GC.Collect();
             }
 
             return false;
@@ -794,6 +796,7 @@ namespace betterpad
 
                 //Own dispose code
                 _finder.Dispose();
+                text.Dispose();
             }
 
             base.Dispose(disposing);
