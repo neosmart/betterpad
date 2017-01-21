@@ -113,7 +113,7 @@ namespace betterpad
                 { Keys.Control | Keys.Shift | Keys.N, NewWindow },
                 { Keys.Control | Keys.O, Open },
                 { Keys.Control | Keys.Shift | Keys.O, OpenNew },
-                { Keys.Control | Keys.S, () => { Save(); } },
+                { Keys.Control | Keys.S, () => Save() },
                 { Keys.F12, SaveAs },
                 { Keys.Control | Keys.P, Print },
                 { Keys.Control | Keys.W, Exit },
@@ -122,8 +122,8 @@ namespace betterpad
                 { Keys.Control | Keys.C, Copy },
                 { Keys.Control | Keys.V, Paste },
                 { Keys.Control | Keys.Y, text.Redo },
-                { Keys.Control | Keys.F, Find },
-                { Keys.F3, FindNext },
+                { Keys.Control | Keys.F, () => Find() },
+                { Keys.F3, () => FindNext() },
                 { Keys.Shift | Keys.F3, FindPrevious },
                 { Keys.Control | Keys.H, Replace },
                 { Keys.Control | Keys.G, GoTo },
@@ -153,8 +153,8 @@ namespace betterpad
                 { copyToolStripMenuItem, Copy },
                 { pasteToolStripMenuItem, Paste },
                 { deleteToolStripMenuItem, Delete },
-                { findToolStripMenuItem, Find },
-                { findNextToolStripMenuItem, FindNext },
+                { findToolStripMenuItem, () => Find() },
+                { findNextToolStripMenuItem, () => FindNext() },
                 { replaceToolStripMenuItem, Replace },
                 { goToToolStripMenuItem, GoTo },
                 { selectAllToolStripMenuItem, text.SelectAll },
@@ -457,7 +457,7 @@ namespace betterpad
             }
         }
 
-        private void Find()
+        private bool Find()
         {
             _finder.SearchBox.SelectAll();
             _finder.SearchBox.Focus();
@@ -472,11 +472,13 @@ namespace betterpad
                 _findStatus.EndPosition = -1;
                 _findStatus.FirstResult = -1;
                 _findStatus.Direction = FindStatus.SearchDirection.Forward;
-                FindNext();
+                return FindNext();
             }
+
+            return false;
         }
 
-        private void FindNext()
+        private bool FindNext()
         {
             if (_findStatus.Direction != FindStatus.SearchDirection.Forward ||
                 _findStatus.StartPosition == -1)
@@ -489,15 +491,16 @@ namespace betterpad
                 _findStatus.EndPosition = -1;
             }
 
-            Find(-1, false);
+            return Find(-1, false);
         }
 
-        private void Find(int end, bool reverse)
+        private bool Find(int end, bool reverse)
         {
+            var notFound = false;
+
             if (string.IsNullOrEmpty(_findStatus.SearchTerm))
             {
-                Find();
-                return;
+                return Find();
             }
 
             text.SelectionChanged -= SelectionChangedFindHandler;
@@ -508,20 +511,19 @@ namespace betterpad
             {
                 _findStatus.StartPosition = 0;
                 _findStatus.EndPosition = -1;
-                Find(end, reverse);
-                return;
+                return Find(end, reverse);
             }
             else if (index == -1 && _findStatus.Direction == FindStatus.SearchDirection.Reverse && _findStatus.EndPosition <= _findStatus.OriginalStartPosition && _findStatus.EndPosition != -1)
             {
                 _findStatus.StartPosition = _findStatus.OriginalStartPosition;
                 _findStatus.EndPosition = -1;
-                Find(end, reverse);
-                return;
+                return Find(end, reverse);
             }
 
             if (index == -1)
             {
                 SystemSounds.Beep.Play();
+                notFound = true;
                 SetStatus("No results found!", TimeSpan.FromMilliseconds(3000));
             }
             else if (index == _findStatus.FirstResult)
@@ -531,6 +533,7 @@ namespace betterpad
                 _findStatus.StartPosition = _findStatus.Direction == FindStatus.SearchDirection.Forward ? _findStatus.OriginalStartPosition : 0;
                 _findStatus.EndPosition = _findStatus.Direction == FindStatus.SearchDirection.Forward ? -1 : _findStatus.OriginalStartPosition;
                 SystemSounds.Beep.Play();
+                notFound = true;
                 SetStatus("No more results! Search restarted.", TimeSpan.FromMilliseconds(3000));
             }
             else if (_findStatus.FirstResult == -1)
@@ -553,6 +556,8 @@ namespace betterpad
 
             //Hook the selection changed event to allow restarting search from current position
             text.SelectionChanged += SelectionChangedFindHandler;
+
+            return !notFound;
         }
 
         private void FindPrevious()
@@ -572,7 +577,57 @@ namespace betterpad
 
         private void Replace()
         {
-            throw new NotImplementedException();
+            using (var replaceDialog = new ReplaceDialog(text))
+            {
+                replaceDialog.Status = SetStatus;
+                string lastSearch = null;
+                string lastReplace = null;
+                RichTextBoxFinds lastOptions = RichTextBoxFinds.None;
+                replaceDialog.FindCallback = (term) =>
+                {
+                    if (term != lastSearch || lastOptions != _findStatus.Options)
+                    {
+                        lastSearch = term;
+                        lastOptions = _findStatus.Options;
+
+                        _findStatus.FindCount = 0;
+                        _findStatus.SearchTerm = term;
+                        _findStatus.Options = replaceDialog.Options;
+                        _findStatus.StartPosition = text.SelectionStart + text.SelectionLength;
+                        _findStatus.EndPosition = -1;
+                        _findStatus.FirstResult = -1;
+                        _findStatus.Direction = FindStatus.SearchDirection.Forward;
+                    }
+                    var result = FindNext();
+                    return result;
+                };
+                replaceDialog.ReplaceCallback = (term, replacement) =>
+                {
+                    if (term != lastSearch || lastOptions != _findStatus.Options || replacement != lastReplace)
+                    {
+                        lastSearch = term;
+                        lastOptions = _findStatus.Options;
+                        lastReplace = replacement;
+
+                        _findStatus.FindCount = 0;
+                        _findStatus.SearchTerm = term;
+                        _findStatus.Options = replaceDialog.Options;
+                        _findStatus.StartPosition = text.SelectionStart;
+                        _findStatus.EndPosition = -1;
+                        _findStatus.FirstResult = -1;
+                        _findStatus.Direction = FindStatus.SearchDirection.Forward;
+                    }
+                    if (FindNext())
+                    {
+                        text.SelectionChanged -= SelectionChangedFindHandler;
+                        text.Insert(replacement);
+                        text.SelectionChanged += SelectionChangedFindHandler;
+                        return true;
+                    }
+                    return false;
+                };
+                replaceDialog.ShowDialog(this);
+            }
         }
 
         private void GoTo()

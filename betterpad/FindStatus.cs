@@ -7,7 +7,7 @@ using System.Windows.Forms;
 
 namespace betterpad
 {
-    class FindStatus
+    class FindStatus 
     {
         public enum SearchDirection
         {
