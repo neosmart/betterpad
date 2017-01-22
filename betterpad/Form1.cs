@@ -478,7 +478,7 @@ namespace betterpad
             return false;
         }
 
-        private bool FindNext()
+        private bool FindNext(bool noDialog = false)
         {
             if (_findStatus.Direction != FindStatus.SearchDirection.Forward ||
                 _findStatus.StartPosition == -1)
@@ -491,16 +491,23 @@ namespace betterpad
                 _findStatus.EndPosition = -1;
             }
 
-            return Find(-1, false);
+            return Find(-1, false, noDialog);
         }
 
-        private bool Find(int end, bool reverse)
+        private bool Find(int end, bool reverse, bool noDialog = false)
         {
             var notFound = false;
 
             if (string.IsNullOrEmpty(_findStatus.SearchTerm))
             {
-                return Find();
+                if (!noDialog)
+                {
+                    return Find();
+                }
+                else
+                {
+                    return false;
+                }
             }
 
             text.SelectionChanged -= SelectionChangedFindHandler;
@@ -598,7 +605,7 @@ namespace betterpad
                         _findStatus.FirstResult = -1;
                         _findStatus.Direction = FindStatus.SearchDirection.Forward;
                     }
-                    var result = FindNext();
+                    var result = FindNext(true);
                     return result;
                 };
                 replaceDialog.ReplaceCallback = (term, replacement) =>
@@ -617,7 +624,7 @@ namespace betterpad
                         _findStatus.FirstResult = -1;
                         _findStatus.Direction = FindStatus.SearchDirection.Forward;
                     }
-                    if (FindNext())
+                    if (FindNext(true))
                     {
                         text.SelectionChanged -= SelectionChangedFindHandler;
                         text.Insert(replacement);
