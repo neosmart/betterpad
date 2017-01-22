@@ -8,7 +8,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyTitle("betterpad")]
 [assembly: AssemblyDescription("A better notepad. Still simple. Still fast.")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("")]
+[assembly: AssemblyCompany("NeoSmart Technologies")]
 [assembly: AssemblyProduct("betterpad")]
 [assembly: AssemblyCopyright("Copyright © NeoSmart Technologies 2016-2017. All rights reserved.")]
 [assembly: AssemblyTrademark("betterpad is a trademark of NeoSmart Technologies.")]

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
@@ -16,6 +17,8 @@ namespace betterpad
         private string _lastDumpDirectory = null;
         public static bool ShutdownInitiated { get; private set; }
         public static ManualResetEventSlim ShutdownDumpComplete = new ManualResetEventSlim(false);
+        private static string _appName;
+        private static string _appCompany;
 
         [DllImport("kernel32.dll")]
         static extern uint RegisterApplicationRecoveryCallback(IntPtr pRecoveryCallback, IntPtr pvParameter, int dwPingInterval, int dwFlags);
@@ -44,6 +47,20 @@ namespace betterpad
             var callback = new ApplicationRecoveryCallback(CreateRecoveryData);
             IntPtr del = Marshal.GetFunctionPointerForDelegate(callback);
             RegisterApplicationRecoveryCallback(del, IntPtr.Zero, 5000, 0);
+
+            if (_appName == null)
+            {
+                using (var process = Process.GetCurrentProcess())
+                {
+                    var path = process.MainModule.FileName;
+                    _appName = Path.GetFileNameWithoutExtension(path);
+                    _appCompany = FileVersionInfo.GetVersionInfo(path).CompanyName;
+                    if (string.IsNullOrWhiteSpace(_appName))
+                    {
+                        _appCompany = "{EC8B5FBC-2565-4CBD-9289-0000F25C1DFB}";
+                    }
+                }
+            }
         }
 
         public int CreateRecoveryData()
@@ -66,7 +83,7 @@ namespace betterpad
 
             try
             {
-                var tempDir = path ?? Path.Combine(Path.GetTempPath(), "betterpad-" + Path.GetRandomFileName());
+                var tempDir = path ?? Path.Combine(Path.GetTempPath(), _appName + "-" + Path.GetRandomFileName());
                 if (!Directory.Exists(tempDir))
                 {
                     Directory.CreateDirectory(tempDir);
@@ -193,7 +210,7 @@ namespace betterpad
         {
             get
             {
-                return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "NeoSmart Technologies", Path.GetFileNameWithoutExtension(Application.ExecutablePath), "unsafe-recovery");
+                return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), _appCompany, _appName, "unsafe-recovery");
             }
         }
 
@@ -225,7 +242,7 @@ namespace betterpad
                     ShutdownInitiated = true;
                     var recoveryMan = new RecoveryManager();
                     recoveryMan.CreateRecoveryData(recoveryMan.UnsafeShutdownPath);
-                    RecoveryManager.ShutdownDumpComplete.Set();
+                    ShutdownDumpComplete.Set();
                     m.Result = new IntPtr(ENDSESSION_CLOSEAPP);
                     return true;
                 }
