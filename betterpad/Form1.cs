@@ -321,6 +321,7 @@ namespace betterpad
                 AfterShow = (form) =>
                 {
                     form.Focus();
+                    form.BringToFront();
                     if (string.IsNullOrEmpty(path))
                     {
                         form.Open();
@@ -842,6 +843,12 @@ namespace betterpad
             if (RecoveryManager.MessageHandler(ref m))
             {
                 return;
+            }
+
+            if (m.Msg == Win32.WM_COPYDATA)
+            {
+                var path = Win32.ReceiveWindowMessage(m);
+                OpenNew(path, false);
             }
 
             base.WndProc(ref m);

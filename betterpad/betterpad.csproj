@@ -59,6 +59,7 @@
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Messaging" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -114,6 +115,7 @@
     <Compile Include="RecoveryInfo.cs" />
     <Compile Include="RecoveryManager.cs" />
     <Compile Include="ScopedMutex.cs" />
+    <Compile Include="Win32.cs" />
     <Compile Include="WindowManager.cs" />
     <EmbeddedResource Include="AboutDialog.resx">
       <DependentUpon>AboutDialog.cs</DependentUpon>

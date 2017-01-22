@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Messaging;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -23,8 +24,8 @@ namespace betterpad
         private static Semaphore CreateWindowEvent = new Semaphore(0, 256);
         private static ManualResetEvent AllWindowsClosed = new ManualResetEvent(false);
         private static ManualResetEvent CloseAll = new ManualResetEvent(false);
-        private int ThreadCounter = 0;
         private static RecoveryManager _recoveryManager = new RecoveryManager();
+        private int ThreadCounter = 0;
 
         private static void ThreadRunner()
         {
@@ -83,15 +84,7 @@ namespace betterpad
                         }
                     }
 
-                    var openAction = new NewFormActions()
-                    {
-                        AfterShow = (f) =>
-                        {
-                            f.Open(path);
-                            f.Focus();
-                        }
-                    };
-                    CreateNewWindow(openAction);
+                    OpenInNewWindow(path);
                 }
             }
 
@@ -157,6 +150,19 @@ namespace betterpad
 
                 }
             }
+        }
+
+        private void OpenInNewWindow(string path)
+        {
+            var openAction = new NewFormActions()
+            {
+                AfterShow = (f) =>
+                {
+                    f.Open(path);
+                    f.Focus();
+                }
+            };
+            CreateNewWindow(openAction);
         }
 
         public static void CreateNewWindow(NewFormActions actions = new NewFormActions())

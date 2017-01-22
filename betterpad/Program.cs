@@ -24,12 +24,12 @@ namespace betterpad
                 if (!mutex.WaitOne(0))
                 {
                     //Another session exists
-                    BringToForeground();
+                    BringToForeground(Environment.GetCommandLineArgs().Skip(1));
                     return;
                 }
                 if (Environment.OSVersion.Version.Major >= 6)
                 {
-                    SetProcessDPIAware();
+                    Win32.SetProcessDPIAware();
                 }
                 Application.EnableVisualStyles();
                 Application.SetCompatibleTextRenderingDefault(false);
@@ -38,13 +38,7 @@ namespace betterpad
             }
         }
 
-        [DllImport("user32.dll")]
-        private static extern bool SetProcessDPIAware();
-
-        [DllImport("user32.dll")]
-        private static extern bool SetForegroundWindow(IntPtr hWnd);
-
-        private static void BringToForeground()
+        private static void BringToForeground(IEnumerable<string> paths = null)
         {
             int pid = 0;
             using (var thisProcess = Process.GetCurrentProcess())
@@ -61,7 +55,14 @@ namespace betterpad
                     continue;
                 }
 
-                SetForegroundWindow(process.MainWindowHandle);
+                Win32.SetForegroundWindow(process.MainWindowHandle);
+                if (paths != null)
+                {
+                    foreach (var path in paths)
+                    {
+                        Win32.SendWindowsStringMessage(process.MainWindowHandle, 0, path, IntPtr.Zero);
+                    }
+                }
             }
 
             foreach (var p in processes)
