@@ -56,9 +56,10 @@
             this.btnCancel.Location = new System.Drawing.Point(369, 205);
             this.btnCancel.Name = "btnCancel";
             this.btnCancel.Size = new System.Drawing.Size(140, 39);
-            this.btnCancel.TabIndex = 3;
+            this.btnCancel.TabIndex = 6;
             this.btnCancel.Text = "&Cancel";
             this.btnCancel.UseVisualStyleBackColor = true;
+            this.btnCancel.Click += new System.EventHandler(this.btnCancel_Click);
             // 
             // groupBox1
             // 
@@ -67,7 +68,7 @@
             this.groupBox1.Location = new System.Drawing.Point(12, 160);
             this.groupBox1.Name = "groupBox1";
             this.groupBox1.Size = new System.Drawing.Size(350, 84);
-            this.groupBox1.TabIndex = 4;
+            this.groupBox1.TabIndex = 2;
             this.groupBox1.TabStop = false;
             // 
             // chkWholeWord
@@ -97,7 +98,7 @@
             this.btnReplace.Location = new System.Drawing.Point(369, 67);
             this.btnReplace.Name = "btnReplace";
             this.btnReplace.Size = new System.Drawing.Size(140, 39);
-            this.btnReplace.TabIndex = 2;
+            this.btnReplace.TabIndex = 4;
             this.btnReplace.Text = "&Replace";
             this.btnReplace.UseVisualStyleBackColor = true;
             this.btnReplace.Click += new System.EventHandler(this.btnReplace_Click);
@@ -108,7 +109,7 @@
             this.groupBox2.Location = new System.Drawing.Point(12, 12);
             this.groupBox2.Name = "groupBox2";
             this.groupBox2.Size = new System.Drawing.Size(344, 72);
-            this.groupBox2.TabIndex = 5;
+            this.groupBox2.TabIndex = 0;
             this.groupBox2.TabStop = false;
             this.groupBox2.Text = "Find";
             // 
@@ -118,7 +119,7 @@
             this.groupBox3.Location = new System.Drawing.Point(12, 90);
             this.groupBox3.Name = "groupBox3";
             this.groupBox3.Size = new System.Drawing.Size(344, 72);
-            this.groupBox3.TabIndex = 6;
+            this.groupBox3.TabIndex = 1;
             this.groupBox3.TabStop = false;
             this.groupBox3.Text = "Replace";
             // 
@@ -134,7 +135,7 @@
             this.btnReplaceAll.Location = new System.Drawing.Point(369, 112);
             this.btnReplaceAll.Name = "btnReplaceAll";
             this.btnReplaceAll.Size = new System.Drawing.Size(140, 39);
-            this.btnReplaceAll.TabIndex = 7;
+            this.btnReplaceAll.TabIndex = 5;
             this.btnReplaceAll.Text = "Replace &All";
             this.btnReplaceAll.UseVisualStyleBackColor = true;
             this.btnReplaceAll.Click += new System.EventHandler(this.btnReplaceAll_Click);
@@ -144,7 +145,7 @@
             this.btnFind.Location = new System.Drawing.Point(369, 22);
             this.btnFind.Name = "btnFind";
             this.btnFind.Size = new System.Drawing.Size(140, 39);
-            this.btnFind.TabIndex = 1;
+            this.btnFind.TabIndex = 3;
             this.btnFind.Text = "&Find Next";
             this.btnFind.UseVisualStyleBackColor = true;
             this.btnFind.Click += new System.EventHandler(this.btnFind_Click);
