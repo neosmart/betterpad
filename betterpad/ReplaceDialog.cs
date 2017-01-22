@@ -32,8 +32,7 @@ namespace betterpad
         {
             if (keyData == Keys.Escape)
             {
-                DialogResult = DialogResult.Cancel;
-                Close();
+                btnCancel.PerformClick();
                 return true;
             }
             if (keyData == Keys.Enter)
@@ -74,7 +73,8 @@ namespace betterpad
         {
             if (!FindCallback(SearchTerm))
             {
-                Status("No more matches found!");
+                System.Media.SystemSounds.Beep.Play();
+                Status("No matches found!");
             }
         }
 
@@ -87,7 +87,8 @@ namespace betterpad
             }
             else
             {
-                Status("No more matches found!");
+                System.Media.SystemSounds.Beep.Play();
+                Status("No matches found!");
             }
         }
 
@@ -98,10 +99,23 @@ namespace betterpad
             {
                 //move to next match
                 ++replacements;
-                FindCallback(SearchTerm);
+                if (!FindCallback(SearchTerm))
+                {
+                    break;
+                }
             }
 
+            if (replacements == 0)
+            {
+                System.Media.SystemSounds.Beep.Play();
+            }
             Status($"Replaced {replacements} occurrence(s)");
+        }
+
+        private void btnCancel_Click(object sender, EventArgs e)
+        {
+            DialogResult = DialogResult.Cancel;
+            Close();
         }
     }
 }
