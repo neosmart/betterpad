@@ -364,7 +364,7 @@
             this.text.Font = new System.Drawing.Font("Consolas", 11F);
             this.text.HideSelection = false;
             this.text.Location = new System.Drawing.Point(0, 0);
-            this.text.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.text.Margin = new System.Windows.Forms.Padding(4);
             this.text.Name = "text";
             this.text.Size = new System.Drawing.Size(1007, 591);
             this.text.TabIndex = 0;
@@ -382,7 +382,7 @@
             this.Controls.Add(this.text);
             this.Controls.Add(this.statusStrip1);
             this.Controls.Add(this.testbox);
-            this.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.Margin = new System.Windows.Forms.Padding(4);
             this.Menu = this.mainMenu1;
             this.Name = "Form1";
             this.Text = "betterpad by NeoSmart Technologies";

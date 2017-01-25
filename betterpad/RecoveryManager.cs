@@ -231,7 +231,7 @@ namespace betterpad
             {
                 //system getting ready to shut down
                 //individual *forms* receive this message, so we must protect against a race condition
-                using (var shutdownMutex = new ScopedMutex("{EA433526-9724-43FD-B175-6EA7BA7517A4}"))
+                using (var shutdownMutex = new ScopedMutex(_appName + "{EA433526-9724-43FD-B175-6EA7BA7517A4}"))
                 {
                     if (ShutdownInitiated)
                     {

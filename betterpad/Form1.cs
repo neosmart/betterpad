@@ -28,6 +28,7 @@ namespace betterpad
         private object _statusTimerLock = new object();
         private Timer _statusTimer = null;
         public BetterRichTextBox BetterBox => text;
+        private Preferences _preferences;
 
         private bool DocumentChanged
         {
@@ -65,6 +66,7 @@ namespace betterpad
             InitializeHandlers();
             HookLocationDetection();
             GetDocumentNumber();
+            LoadPreferences();
             SetTitle($"Untitled {_documentNumber}");
             _lastHash = DocumentHash;
             _finder = new FindDialog(text);
@@ -160,7 +162,7 @@ namespace betterpad
                 { selectAllToolStripMenuItem, text.SelectAll },
                 { timeDateToolStripMenuItem, TimeDate },
                 //Format menu
-                { wordWrapToolStripMenuItem, WordWrap },
+                { wordWrapToolStripMenuItem, ToggleWordWrap },
                 { fontToolStripMenuItem, ConfigureFont },
                 //View menu
                 { statusBarToolStripMenuItem, StatusBar },
@@ -190,6 +192,7 @@ namespace betterpad
             text_SelectionChanged(null, null);
             text_TextChanged(null, null);
             statusBarToolStripMenuItem.PerformClick();
+            wordWrapToolStripMenuItem.PerformClick();
             wordWrapToolStripMenuItem.PerformClick();
             lblStatus1.Text = string.Empty;
             lblStatus2.Text = string.Empty;
@@ -672,10 +675,16 @@ namespace betterpad
         }
 
         //Format menu handlers
-        private void WordWrap()
+        private void WordWrap(bool wrap)
         {
-            wordWrapToolStripMenuItem.Checked = !wordWrapToolStripMenuItem.Checked;
-            text.WordWrap = wordWrapToolStripMenuItem.Checked;
+            wordWrapToolStripMenuItem.Checked = wrap;
+            text.WordWrap = wrap;
+        }
+
+        private void ToggleWordWrap()
+        {
+            wordWrapToolStripMenuItem.Checked = !text.WordWrap;
+            text.WordWrap = !text.WordWrap;
         }
 
         private void StatusBar()
@@ -767,6 +776,8 @@ namespace betterpad
             {
                 e.Cancel = true;
             }
+
+            SavePreferences();
         }
 
         private void Form1_Shown(object sender, EventArgs e)
@@ -817,17 +828,17 @@ namespace betterpad
 
         private void DragDropHandler(object sender, DragEventArgs e)
         {
-            var replaceDocument = DocumentChanged && text.Text.Length == 0;
+            var inNewWindow = DocumentChanged && text.Text.Length == 0;
             var paths = (string[])e.Data.GetData(DataFormats.FileDrop);
             foreach (var path in paths)
             {
-                if (replaceDocument)
+                if (inNewWindow)
                 {
                     OpenNew(path, false);
                 }
                 else
                 {
-                    replaceDocument = true; //we can only replace one document
+                    inNewWindow = true; //we can only replace one document
                     Open(path);
                 }
             }
@@ -869,6 +880,31 @@ namespace betterpad
             }
 
             base.Dispose(disposing);
+        }
+
+        private void LoadPreferences()
+        {
+            _preferences = Preferences.Load();
+            if (_preferences == null)
+            {
+                _preferences = new Preferences();
+                return;
+            }
+
+            Width = _preferences.Width;
+            Height = _preferences.Height;
+            WordWrap(_preferences.WordWrap);
+            text.Font.Dispose();
+            text.Font = new Font(_preferences.FontFamily, (float) _preferences.FontSize);
+        }
+
+        private void SavePreferences()
+        {
+            _preferences.Width = Width;
+            _preferences.Height = Height;
+            _preferences.FontFamily = text.Font.Name;
+            _preferences.FontSize = text.Font.Size;
+            _preferences.Save();
         }
     }
 }
