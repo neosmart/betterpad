@@ -379,17 +379,21 @@ namespace betterpad
                     Filter = "Text Files (*.txt)|*.txt|Log Files (*.log)|*.log"
                 })
                 {
-                    if (dialog.ShowDialog(this) == DialogResult.OK)
+                    var result = dialog.ShowDialog(this);
+                    GC.Collect();
+                    if (result == DialogResult.OK)
                     {
                         FilePath = dialog.FileName;
-                        Save(FilePath);
-                        return true;
+                    }
+                    else
+                    {
+                        return false;
                     }
                 }
-                GC.Collect();
             }
 
-            return false;
+            Save(FilePath);
+            return true;
         }
 
         private void Save(string path)
