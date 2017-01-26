@@ -904,6 +904,7 @@ namespace betterpad
             _preferences.Height = Height;
             _preferences.FontFamily = text.Font.Name;
             _preferences.FontSize = text.Font.Size;
+            _preferences.WordWrap = text.WordWrap;
             _preferences.Save();
         }
     }
