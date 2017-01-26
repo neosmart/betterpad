@@ -12,7 +12,7 @@ namespace betterpad
     internal class Preferences
     {
         public string FontFamily;
-        public double FontSize;
+        public float FontSize;
         public bool WordWrap;
         public int Width;
         public int Height;

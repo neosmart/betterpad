@@ -28,7 +28,6 @@ namespace betterpad
         private object _statusTimerLock = new object();
         private Timer _statusTimer = null;
         public BetterRichTextBox BetterBox => text;
-        private Preferences _preferences;
 
         private bool DocumentChanged
         {
@@ -884,28 +883,30 @@ namespace betterpad
 
         private void LoadPreferences()
         {
-            _preferences = Preferences.Load();
-            if (_preferences == null)
+            var preferences = Preferences.Load();
+            if (preferences == null)
             {
-                _preferences = new Preferences();
                 return;
             }
 
-            Width = _preferences.Width;
-            Height = _preferences.Height;
-            WordWrap(_preferences.WordWrap);
+            Width = preferences.Width;
+            Height = preferences.Height;
+            WordWrap(preferences.WordWrap);
             text.Font.Dispose();
-            text.Font = new Font(_preferences.FontFamily, (float) _preferences.FontSize);
+            text.Font = new Font(preferences.FontFamily, preferences.FontSize);
         }
 
         private void SavePreferences()
         {
-            _preferences.Width = Width;
-            _preferences.Height = Height;
-            _preferences.FontFamily = text.Font.Name;
-            _preferences.FontSize = text.Font.Size;
-            _preferences.WordWrap = text.WordWrap;
-            _preferences.Save();
+            var preferences = new Preferences()
+            {
+                Width = Width,
+                Height = Height,
+                FontFamily = text.Font.Name,
+                FontSize = text.Font.Size,
+                WordWrap = text.WordWrap
+            };
+            preferences.Save();
         }
     }
 }
