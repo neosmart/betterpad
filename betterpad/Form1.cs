@@ -401,6 +401,7 @@ namespace betterpad
         private void Save(string path)
         {
             File.WriteAllText(path, text.Text, new UTF8Encoding(false));
+            SetTitle(Path.GetFileName(path));
             _lastHash = DocumentHash;
 
             GC.Collect();
