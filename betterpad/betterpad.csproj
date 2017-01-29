@@ -78,6 +78,7 @@
     <Compile Include="AboutDialog.Designer.cs">
       <DependentUpon>AboutDialog.cs</DependentUpon>
     </Compile>
+    <Compile Include="FileExtensions.cs" />
     <Compile Include="Preferences.cs" />
     <Compile Include="ReplaceDialog.cs">
       <SubType>Form</SubType>
