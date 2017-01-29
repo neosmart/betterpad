@@ -11,42 +11,49 @@ namespace betterpad
     [Serializable]
     internal class Preferences
     {
-        public string FontFamily;
-        public float FontSize;
-        public bool WordWrap;
-        public int Width;
-        public int Height;
+        public string FontFamily = "Consolas";
+        public float FontSize = 11;
+        public bool WordWrap = true;
+        public int Width = 1024;
+        public int Height = 800;
+
+        private static string _path => Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "NeoSmart Technologies", "betterpad", "preferences.js");
 
         public static Preferences Load()
         {
-            var prefPath = Environment.ExpandEnvironmentVariables("%localappdata%\\NeoSmart Technologies\\betterpad\\preferences.js");
-            if (!File.Exists(prefPath))
+            if (!File.Exists(_path))
             {
-                return null;
+                return new Preferences();
             }
 
-            var serializer = new DataContractJsonSerializer(typeof(Preferences));
-            using (var fstream = new FileStream(prefPath, System.IO.FileMode.Open))
+            try
             {
-                return serializer.ReadObject(fstream) as Preferences;
+                var serializer = new DataContractJsonSerializer(typeof(Preferences));
+                using (var fstream = new FileStream(_path, FileMode.Open))
+                {
+                    return serializer.ReadObject(fstream) as Preferences;
+                }
+            }
+            catch
+            {
+                return new Preferences();
             }
         }
 
         public void Save()
         {
-            var prefPath = Environment.ExpandEnvironmentVariables("%localappdata%\\NeoSmart Technologies\\betterpad\\preferences.js");
-            if (File.Exists(prefPath))
+            if (File.Exists(_path))
             {
-                File.Delete(prefPath);
+                File.Delete(_path);
             }
-            if (!Directory.Exists(Path.GetDirectoryName(prefPath)))
+            if (!Directory.Exists(Path.GetDirectoryName(_path)))
             {
-                Directory.CreateDirectory(Path.GetDirectoryName(prefPath));
+                Directory.CreateDirectory(Path.GetDirectoryName(_path));
             }
 
             var serializer = new DataContractJsonSerializer(typeof(Preferences));
             using (var mutex = new ScopedMutex("{F995FD2B-04EC-4410-AB57-9B4E6FF4B2B2}"))
-            using (var fstream = new FileStream(prefPath, System.IO.FileMode.Create))
+            using (var fstream = new FileStream(_path, FileMode.Create))
             {
                 mutex.WaitOne();
                 serializer.WriteObject(fstream, this);
