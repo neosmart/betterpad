@@ -115,6 +115,7 @@
             // newToolStripMenuItem
             // 
             this.newToolStripMenuItem.Index = 0;
+            this.newToolStripMenuItem.Shortcut = System.Windows.Forms.Shortcut.CtrlN;
             this.newToolStripMenuItem.Text = "&New";
             // 
             // newWindowToolStripMenuItem
