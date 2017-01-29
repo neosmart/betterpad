@@ -360,6 +360,7 @@ namespace betterpad
 
             var data = File.ReadAllText(path, Encoding.UTF8);
             text.Text = data;
+            SetStatus("Document loaded");
             _lastHash = DocumentHash;
 
             GC.Collect();
@@ -402,6 +403,7 @@ namespace betterpad
         {
             File.WriteAllText(path, text.Text, new UTF8Encoding(false));
             SetTitle(Path.GetFileName(path));
+            SetStatus("Changes saved");
             _lastHash = DocumentHash;
 
             GC.Collect();
@@ -805,12 +807,12 @@ namespace betterpad
 
         private void SetStatus(string message)
         {
-            lblStatus1.Text = message;
+            SetStatus(message, TimeSpan.FromSeconds(4));
         }
 
         private void SetStatus(string message, TimeSpan timeout)
         {
-            SetStatus(message);
+            lblStatus1.Text = message;
 
             lock (_statusTimerLock)
             {
