@@ -920,7 +920,7 @@ namespace betterpad
             var preferences = new Preferences()
             {
                 Width = Width,
-                Height = Height,
+                Height = Height - 34,  //I don't know why, but the height creeps up by 34 each time
                 FontFamily = text.Font.Name,
                 FontSize = text.Font.Size,
                 WordWrap = text.WordWrap
