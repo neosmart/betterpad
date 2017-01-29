@@ -73,6 +73,9 @@ namespace betterpad
 
         private void InitializeHandlers()
         {
+            Load += (s, e) => {
+                text.Padding = new Padding(10, 10, 12, 10);
+            };
         }
 
         private void SelectionChangedFindHandler(object sender, EventArgs e)
@@ -187,7 +190,6 @@ namespace betterpad
                 _processPath = process.MainModule.FileName;
             }
             Icon = Icon.ExtractAssociatedIcon(_processPath);
-            text.Padding = new Padding(14, 10, 12, 10);
             text_SelectionChanged(null, null);
             text_TextChanged(null, null);
             statusBarToolStripMenuItem.PerformClick();
