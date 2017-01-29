@@ -76,6 +76,29 @@ namespace betterpad
             Load += (s, e) => {
                 text.Padding = new Padding(10, 10, 12, 10);
             };
+
+            text.LinkClicked += (s, e) =>
+            {
+                //Only open URLs if the ctrl button is held down
+                if (!((ModifierKeys & Keys.Control) == Keys.Control))
+                {
+                    return;
+                }
+
+                var link = e.LinkText;
+                if (Uri.TryCreate(link, UriKind.Absolute, out var uri) && uri.Host.Contains("."))
+                {
+                    using (var p = new Process())
+                    {
+                        p.StartInfo = new ProcessStartInfo(uri.AbsoluteUri);
+                        p.Start();
+                    }
+                }
+                else
+                {
+                    SetStatus("Invalid URL!");
+                }
+            };
         }
 
         private void SelectionChangedFindHandler(object sender, EventArgs e)
