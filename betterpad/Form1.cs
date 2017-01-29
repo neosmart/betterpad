@@ -291,13 +291,22 @@ namespace betterpad
                 Title = "Open file"
             })
             {
-                if (dialog.ShowDialog(this) == DialogResult.OK)
+                if (dialog.ShowDialog(this) == DialogResult.OK && dialog.FileNames.Length > 0)
                 {
-                    Open(dialog.FileName);
+                    var first = dialog.FileNames.First();
+
+                    //first document
+                    Open(first);
                     //Decrement the document number IF no changes had been made AND no new document was created in the meantime
                     if (!documentChanged)
                     {
                         DecrementDocumentNumber();
+                    }
+
+                    //subsequent documents, if any
+                    foreach (var doc in dialog.FileNames.Skip(1))
+                    {
+                        OpenNew(doc, false);
                     }
                 }
             }
@@ -333,6 +342,7 @@ namespace betterpad
                     else
                     {
                         form.Open(path);
+                        DecrementDocumentNumber();
                     }
                 }
             };
