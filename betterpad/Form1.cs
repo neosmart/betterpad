@@ -82,6 +82,7 @@ namespace betterpad
                 //Only open URLs if the ctrl button is held down
                 if (!((ModifierKeys & Keys.Control) == Keys.Control))
                 {
+                    SetStatus("Hold down CTRL and click to open URL");
                     return;
                 }
 
