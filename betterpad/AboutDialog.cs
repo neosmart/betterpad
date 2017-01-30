@@ -16,10 +16,29 @@ namespace betterpad
             InitializeComponent();
             this.Text = String.Format("About {0}", AssemblyTitle);
             this.labelProductName.Text = AssemblyProduct;
-            this.labelVersion.Text = String.Format("Version {0}", AssemblyVersion);
-            this.labelCopyright.Text = AssemblyCopyright;
+            this.labelVersion.Text = String.Format("Version {0} - build {1}", ShortVersion, BuildHash);
+            this.labelCopyright.Text = AssemblyCopyright.Replace(". ", "\r\n");
             //this.labelCompanyName.Text = AssemblyCompany;
             this.textBoxDescription.Text = AssemblyDescription;
+        }
+
+        private string ShortVersion
+        {
+            get
+            {
+                var version = Assembly.GetExecutingAssembly().GetName().Version;
+                return $"{version.Major}.{version.Minor}.{version.Build}";
+            }
+        }
+
+        private string BuildHash
+        {
+            get
+            {
+                var bytes = System.IO.File.ReadAllBytes(Application.ExecutablePath);
+                MetroHash.MetroHash.Hash64_1(bytes, 0, (uint) bytes.Length, 0, out var hash);
+                return BitConverter.ToString(hash, 0).Replace("-", "").ToLower();
+            }
         }
 
         #region Assembly Attribute Accessors
