@@ -789,9 +789,7 @@ namespace betterpad
                     form._ignoreSettings = true;
 
                     form.text.SelectionStart = sb.Length;
-                    var oldFont = form.text.SelectionFont;
                     form.text.SelectionFont = new Font(form.text.Font.FontFamily, form.text.Font.Size, FontStyle.Italic);
-                    oldFont.Dispose();
                     form.text.SelectedText = "> A better notepad. Still simple. Still fast.";
                     form.text.SelectionStart = 0;
                 }
@@ -994,7 +992,6 @@ namespace betterpad
             Width = preferences.Width;
             Height = preferences.Height;
             WordWrap(preferences.WordWrap);
-            text.Font.Dispose();
             text.Font = new Font(preferences.FontFamily, preferences.FontSize);
         }
 
