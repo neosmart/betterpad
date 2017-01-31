@@ -771,8 +771,7 @@ namespace betterpad
                 {
                     form.Height = 500;
                     form.Width = 800;
-                    form.StartPosition = FormStartPosition.Manual;
-                    form.Location = new Point(Location.X + Width / 2 - form.Width / 2, Location.Y + Height / 2 - form.Height / 2);
+                    form.StartPosition = FormStartPosition.CenterParent;
                 },
                 AfterShow = (form) =>
                 {
@@ -794,9 +793,13 @@ namespace betterpad
                     form.text.SelectionFont = new Font(form.text.Font.FontFamily, form.text.Font.Size, FontStyle.Italic);
                     oldFont.Dispose();
                     form.text.SelectedText = "> A better notepad. Still simple. Still fast.";
+                    form.text.SelectionStart = 0;
                 }
             };
-            WindowManager.CreateNewWindow(actions);
+            var about = new Form1();
+            actions.BeforeShow(about);
+            about.StartAction = actions.AfterShow;
+            about.ShowDialog(this);
         }
 
         private string ShortVersion
