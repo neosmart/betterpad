@@ -9,6 +9,7 @@ using System.IO;
 using System.IO.MemoryMappedFiles;
 using System.Linq;
 using System.Media;
+using System.Reflection;
 using System.Text;
 using System.Windows.Forms;
 
@@ -27,6 +28,7 @@ namespace betterpad
         private FindStatus _findStatus = new FindStatus();
         private object _statusTimerLock = new object();
         private Timer _statusTimer = null;
+        private bool _ignoreSettings = false;
         public BetterRichTextBox BetterBox => text;
 
         private bool DocumentChanged
@@ -758,9 +760,61 @@ namespace betterpad
 
         private void About()
         {
-            using (var dialog = new AboutDialog())
+            /*using (var dialog = new AboutDialog())
             {
                 dialog.ShowDialog(this);
+            }*/
+
+            var actions = new WindowManager.NewFormActions()
+            {
+                BeforeShow = (form) =>
+                {
+                    form.Height = 500;
+                    form.Width = 800;
+                    form.StartPosition = FormStartPosition.Manual;
+                    form.Location = new Point(Location.X + Width / 2 - form.Width / 2, Location.Y + Height / 2 - form.Height / 2);
+                },
+                AfterShow = (form) =>
+                {
+                    var sb = new StringBuilder();
+                    sb.AppendLine($"betterpad by NeoSmart Technologies");
+                    sb.AppendLine($"https://neosmart.net/betterpad/\r\n");
+                    sb.AppendLine($"Version {ShortVersion} - build {BuildHash}\r\n");
+                    sb.AppendLine($"Copyright © NeoSmart Technologies 2016-{DateTime.UtcNow.Year}");
+                    sb.AppendLine("All rights reserved.\r\n\r\n");
+
+                    form.text.Text = sb.ToString();
+                    form.text.ReadOnly = true;
+                    form._ignoreChanges = true;
+                    form.Text = "betterpad by NeoSmart Technologies";
+                    form._ignoreSettings = true;
+
+                    form.text.SelectionStart = sb.Length;
+                    var oldFont = form.text.SelectionFont;
+                    form.text.SelectionFont = new Font(form.text.Font.FontFamily, form.text.Font.Size, FontStyle.Italic);
+                    oldFont.Dispose();
+                    form.text.SelectedText = "> A better notepad. Still simple. Still fast.";
+                }
+            };
+            WindowManager.CreateNewWindow(actions);
+        }
+
+        private string ShortVersion
+        {
+            get
+            {
+                var version = Assembly.GetExecutingAssembly().GetName().Version;
+                return $"{version.Major}.{version.Minor}.{version.Build}";
+            }
+        }
+
+        private string BuildHash
+        {
+            get
+            {
+                var bytes = System.IO.File.ReadAllBytes(Application.ExecutablePath);
+                MetroHash.MetroHash.Hash64_1(bytes, 0, (uint)bytes.Length, 0, out var hash);
+                return BitConverter.ToString(hash, 0).Replace("-", "").ToLower();
             }
         }
 
@@ -941,6 +995,11 @@ namespace betterpad
 
         private void SavePreferences()
         {
+            if (_ignoreSettings)
+            {
+                return;
+            }
+
             var preferences = new Preferences()
             {
                 Width = Width,
