@@ -796,10 +796,12 @@ namespace betterpad
                     form.text.SelectionStart = 0;
                 }
             };
-            var about = new Form1();
-            actions.BeforeShow(about);
-            about.StartAction = actions.AfterShow;
-            about.ShowDialog(this);
+            using (var about = new Form1())
+            {
+                actions.BeforeShow(about);
+                about.StartAction = actions.AfterShow;
+                about.ShowDialog(this);
+            }
         }
 
         private string ShortVersion
