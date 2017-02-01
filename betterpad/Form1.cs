@@ -775,6 +775,7 @@ namespace betterpad
                 var updateManager = new UpdateManager();
                 var version = updateManager.GetLatestVersion(false);
                 statusTimer.Stop();
+                statusTimer.Dispose();
 
                 if (version == null)
                 {
