@@ -15,21 +15,28 @@ namespace betterpad
     {
         public VersionInfo GetLatestVersion(bool includeBeta = false)
         {
-            var request = WebRequest.Create("https://api.neosmart.net/GetVersionInfo/1");
-            using (var response = request.GetResponse())
-            using (var stream = response.GetResponseStream())
-            using (var reader = new StreamReader(stream))
+            try
             {
-                /*var serializer = new JavaScriptSerializer();
-                var versions = serializer.Deserialize<VersionInfo[]>(reader.ReadToEnd());*/
+                var request = WebRequest.Create("https://api.neosmart.net/GetVersionInfo/1");
+                using (var response = request.GetResponse())
+                using (var stream = response.GetResponseStream())
+                using (var reader = new StreamReader(stream))
+                {
+                    /*var serializer = new JavaScriptSerializer();
+                    var versions = serializer.Deserialize<VersionInfo[]>(reader.ReadToEnd());*/
 
-                /*var serializer = new JsonParser();
-                var versions = serializer.Parse<VersionInfo[]>(reader.ReadToEnd());*/
+                    /*var serializer = new JsonParser();
+                    var versions = serializer.Parse<VersionInfo[]>(reader.ReadToEnd());*/
 
-                var serializer = new DataContractJsonSerializer(typeof(VersionInfo[]));
-                var versions = (VersionInfo[]) serializer.ReadObject(stream);
+                    var serializer = new DataContractJsonSerializer(typeof(VersionInfo[]));
+                    var versions = (VersionInfo[])serializer.ReadObject(stream);
 
-                return versions.Where(v => includeBeta || v.Level == ReleaseLevel.Stable).Max();
+                    return versions.Where(v => includeBeta || v.Level == ReleaseLevel.Stable).Max();
+                }
+            }
+            catch
+            {
+                return null;
             }
         }
 

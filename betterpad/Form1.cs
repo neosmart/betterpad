@@ -776,7 +776,12 @@ namespace betterpad
                 var version = updateManager.GetLatestVersion(false);
                 statusTimer.Stop();
 
-                if (updateManager.UpdateAvailable(version))
+                if (version == null)
+                {
+                    SystemSounds.Exclamation.Play();
+                    SetStatus("Error checking for updates! Please try check your connection or try again later!");
+                }
+                else if (updateManager.UpdateAvailable(version))
                 {
                     SetStatus("Update available! Lauching download in new window.", TimeSpan.FromSeconds(10));
                     using (var process = new Process())
