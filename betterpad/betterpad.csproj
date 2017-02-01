@@ -118,6 +118,9 @@
     <Compile Include="RecoveryInfo.cs" />
     <Compile Include="RecoveryManager.cs" />
     <Compile Include="ScopedMutex.cs" />
+    <Compile Include="SimpleJson.cs" />
+    <Compile Include="UpdateManager.cs" />
+    <Compile Include="VersionInfo.cs" />
     <Compile Include="Win32.cs" />
     <Compile Include="WindowManager.cs" />
     <EmbeddedResource Include="AboutDialog.resx">

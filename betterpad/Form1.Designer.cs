@@ -61,6 +61,7 @@
             this.testbox = new System.Windows.Forms.Label();
             this.mainMenu1 = new System.Windows.Forms.MainMenu(this.components);
             this.text = new betterpad.BetterRichTextBox();
+            this.checkForUpdateMenuItem = new System.Windows.Forms.MenuItem();
             this.statusStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -316,6 +317,7 @@
             this.helpToolStripMenuItem.MenuItems.AddRange(new System.Windows.Forms.MenuItem[] {
             this.viewHelpToolStripMenuItem,
             this.MenuItem6,
+            this.checkForUpdateMenuItem,
             this.aboutBetterpadToolStripMenuItem});
             this.helpToolStripMenuItem.Text = "&Help";
             // 
@@ -331,7 +333,7 @@
             // 
             // aboutBetterpadToolStripMenuItem
             // 
-            this.aboutBetterpadToolStripMenuItem.Index = 2;
+            this.aboutBetterpadToolStripMenuItem.Index = 3;
             this.aboutBetterpadToolStripMenuItem.Text = "&About Betterpad";
             // 
             // contextMenuStrip1
@@ -373,6 +375,11 @@
             this.text.TextMode = betterpad.BetterRichTextBox.TEXTMODE.TM_PLAINTEXT;
             this.text.SelectionChanged += new System.EventHandler(this.text_SelectionChanged);
             this.text.TextChanged += new System.EventHandler(this.text_TextChanged);
+            // 
+            // checkForUpdateMenuItem
+            // 
+            this.checkForUpdateMenuItem.Index = 2;
+            this.checkForUpdateMenuItem.Text = "Check for &Update";
             // 
             // Form1
             // 
@@ -446,6 +453,7 @@
         private System.Windows.Forms.MainMenu mainMenu1;
         private BetterRichTextBox text;
         private System.Windows.Forms.MenuItem newToolStripMenuItem;
+        private System.Windows.Forms.MenuItem checkForUpdateMenuItem;
     }
 }
 

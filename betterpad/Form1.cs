@@ -196,6 +196,7 @@ namespace betterpad
                 { statusBarToolStripMenuItem, StatusBar },
                 //Help menu
                 { viewHelpToolStripMenuItem, BetterpadHelp },
+                { checkForUpdateMenuItem, CheckForUpdates },
                 { aboutBetterpadToolStripMenuItem, About },
             };
 
@@ -758,6 +759,42 @@ namespace betterpad
             throw new NotImplementedException();
         }
 
+        private void CheckForUpdates()
+        {
+            var statusTimer = new Timer();
+            statusTimer.Interval = 500;
+            uint dotCount = 0;
+            statusTimer.Tick += (s, e) =>
+            {
+                var message = "Checking for updates.";
+                SetStatus(message.PadRight((int) (message.Length + (++dotCount % 4)), '.'));
+            };
+            statusTimer.Start();
+            var thread = new System.Threading.Thread(() =>
+            {
+                var updateManager = new UpdateManager();
+                var version = updateManager.GetLatestVersion(false);
+                statusTimer.Stop();
+
+                if (updateManager.UpdateAvailable(version))
+                {
+                    SetStatus("Update available! Lauching download in new window.", TimeSpan.FromSeconds(10));
+                    using (var process = new Process())
+                    {
+                        process.StartInfo = new ProcessStartInfo(version.DownloadUrl ?? version.InfoUrl);
+                        process.Start();
+                    }
+                }
+                else
+                {
+                    SystemSounds.Asterisk.Play();
+                    SetStatus("No update is available.");
+                }
+
+            });
+            thread.Start();
+        }
+
         private void About()
         {
             /*using (var dialog = new AboutDialog())
@@ -898,6 +935,11 @@ namespace betterpad
 
         private void SetStatus(string message)
         {
+            if (InvokeRequired)
+            {
+                Invoke((Action)(() => { SetStatus(message); }));
+                return;
+            }
             SetStatus(message, TimeSpan.FromSeconds(4));
         }
 
