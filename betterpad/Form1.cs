@@ -835,6 +835,8 @@ namespace betterpad
                     form.text.SelectionFont = new Font(form.text.Font.FontFamily, form.text.Font.Size, FontStyle.Italic);
                     form.text.SelectedText = "> A better notepad. Still simple. Still fast.";
                     form.text.SelectionStart = 0;
+
+                    form._shortcuts.Add(Keys.Escape, () => form.Close());
                 }
             };
             using (var about = new Form1())
