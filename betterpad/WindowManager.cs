@@ -64,26 +64,6 @@ namespace betterpad
             {
                 foreach (var path in args)
                 {
-                    if (!File.Exists(path))
-                    {
-                        try
-                        {
-                            File.Create(path);
-                        }
-                        catch (Exception ex)
-                        {
-                            var result = MessageBox.Show($"Error creating file at path {path}\r\n\r\n{ex.Message}", "Error opening file!", MessageBoxButtons.OKCancel, MessageBoxIcon.Error);
-                            if (result == DialogResult.OK)
-                            {
-                                continue;
-                            }
-                            else
-                            {
-                                break;
-                            }
-                        }
-                    }
-
                     OpenInNewWindow(path);
                 }
             }

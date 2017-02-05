@@ -397,7 +397,8 @@ namespace betterpad
 
             var data = File.ReadAllText(path, Encoding.UTF8);
             text.Text = data;
-            SetStatus("Document loaded");
+            var justCreated = (DateTime.UtcNow - File.GetCreationTimeUtc(path)) < TimeSpan.FromMilliseconds(1000);
+            SetStatus(string.Format("Document {0}", justCreated ? "created" : "loaded"));
             _lastHash = DocumentHash;
 
             GC.Collect();
