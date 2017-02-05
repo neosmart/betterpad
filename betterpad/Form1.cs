@@ -406,35 +406,52 @@ namespace betterpad
 
         private bool Save()
         {
-            if (string.IsNullOrEmpty(FilePath))
+            while (true)
             {
-                using (var dialog = new SaveFileDialog()
+                if (string.IsNullOrEmpty(FilePath))
                 {
-                    AddExtension = true,
-                    AutoUpgradeEnabled = true,
-                    CheckFileExists = false,
-                    CheckPathExists = true,
-                    DefaultExt = "txt",
-                    RestoreDirectory = true,
-                    Title = "Save file",
-                    Filter = "Text Files (*.txt)|*.txt|Log Files (*.log)|*.log"
-                })
-                {
-                    var result = dialog.ShowDialog(this);
-                    GC.Collect();
-                    if (result == DialogResult.OK)
+                    using (var dialog = new SaveFileDialog()
                     {
-                        FilePath = dialog.FileName;
-                    }
-                    else
+                        AddExtension = true,
+                        AutoUpgradeEnabled = true,
+                        CheckFileExists = false,
+                        CheckPathExists = true,
+                        DefaultExt = "txt",
+                        RestoreDirectory = true,
+                        Title = "Save file",
+                        Filter = "Text Files (*.txt)|*.txt|Log Files (*.log)|*.log"
+                    })
                     {
-                        return false;
+                        var result = dialog.ShowDialog(this);
+                        GC.Collect();
+                        if (result == DialogResult.OK)
+                        {
+                            FilePath = dialog.FileName;
+                        }
+                        else
+                        {
+                            return false;
+                        }
                     }
                 }
-            }
 
-            Save(FilePath);
-            return true;
+                try
+                {
+                    Save(FilePath);
+                }
+                catch (UnauthorizedAccessException)
+                {
+                    var result = MessageBox.Show(this, $"Unable to save document to path {FilePath}. Please select a different path and try again.",
+                        "Access denied!", MessageBoxButtons.OKCancel, MessageBoxIcon.Error, MessageBoxDefaultButton.Button1);
+                    if (result == DialogResult.OK)
+                    {
+                        FilePath = null;
+                        continue;
+                    }
+                    return false;
+                }
+                return true;
+            }
         }
 
         private void Save(string path)
