@@ -313,6 +313,7 @@ namespace betterpad
                 Filter = "Plain Text Files|" + FileExtensions.AsFilter + "|Text Files (*.txt)|*.txt|Log Files (*.log)|*.log",
                 Multiselect = true,
                 RestoreDirectory = true,
+                InitialDirectory = string.IsNullOrEmpty(FilePath) ? Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) : Path.GetDirectoryName(FilePath),
                 ShowReadOnly = true,
                 ValidateNames = true,
                 Title = "Open file"
@@ -418,6 +419,7 @@ namespace betterpad
                         CheckPathExists = true,
                         DefaultExt = "txt",
                         RestoreDirectory = true,
+                        InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments),
                         Title = "Save file",
                         Filter = "Text Files (*.txt)|*.txt|Log Files (*.log)|*.log"
                     })
