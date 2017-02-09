@@ -863,6 +863,11 @@ namespace betterpad
                 about.viewToolStripMenuItem.Visible = false;
                 about.helpToolStripMenuItem.Visible = false;
                 about.StartAction = actions.AfterShow;
+                about.FormBorderStyle = FormBorderStyle.FixedSingle;
+                about.SizeGripStyle = SizeGripStyle.Hide;
+                about.ShowInTaskbar = false;
+                about.MaximizeBox = false;
+                about.MinimizeBox = false;
                 about.ShowDialog(this);
             }
         }
