@@ -823,11 +823,6 @@ namespace betterpad
 
         private void About()
         {
-            /*using (var dialog = new AboutDialog())
-            {
-                dialog.ShowDialog(this);
-            }*/
-
             var actions = new WindowManager.NewFormActions()
             {
                 BeforeShow = (form) =>
@@ -862,6 +857,11 @@ namespace betterpad
             using (var about = new Form1())
             {
                 actions.BeforeShow(about);
+                about.fileToolStripMenuItem.Visible = false;
+                about.editToolStripMenuItem.Visible = false;
+                about.formatToolStripMenuItem.Visible = false;
+                about.viewToolStripMenuItem.Visible = false;
+                about.helpToolStripMenuItem.Visible = false;
                 about.StartAction = actions.AfterShow;
                 about.ShowDialog(this);
             }
