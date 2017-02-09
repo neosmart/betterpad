@@ -851,17 +851,16 @@ namespace betterpad
                     form.text.SelectedText = "> A better notepad. Still simple. Still fast.";
                     form.text.SelectionStart = 0;
 
+                    form._shortcuts.Clear();
                     form._shortcuts.Add(Keys.Escape, () => form.Close());
+                    form._shortcuts.Add(Keys.Control | Keys.W, () => form.Close());
                 }
             };
             using (var about = new Form1())
             {
                 actions.BeforeShow(about);
-                about.fileToolStripMenuItem.Visible = false;
-                about.editToolStripMenuItem.Visible = false;
-                about.formatToolStripMenuItem.Visible = false;
-                about.viewToolStripMenuItem.Visible = false;
-                about.helpToolStripMenuItem.Visible = false;
+
+                about.mainMenu1.MenuItems.Clear();
                 about.StartAction = actions.AfterShow;
                 about.FormBorderStyle = FormBorderStyle.FixedSingle;
                 about.SizeGripStyle = SizeGripStyle.Hide;
