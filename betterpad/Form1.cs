@@ -27,7 +27,7 @@ namespace betterpad
         private FindDialog _finder;
         private FindStatus _findStatus = new FindStatus();
         private object _statusTimerLock = new object();
-        private Timer _statusTimer = null;
+        private Timer _statusTimer;
         private bool _ignoreSettings = false;
         public BetterRichTextBox BetterBox => text;
 
@@ -789,7 +789,7 @@ namespace betterpad
                 var message = "Checking for updates.";
                 SetStatus(message.PadRight((int) (message.Length + (++dotCount % 4)), '.'));
             };
-            statusTimer.Start();
+            //statusTimer.Start();
             var thread = new System.Threading.Thread(() =>
             {
                 var updateManager = new UpdateManager();
@@ -975,27 +975,37 @@ namespace betterpad
             SetStatus(message, TimeSpan.FromSeconds(4));
         }
 
+        private void ResetStatus(object sender, EventArgs e)
+        {
+            Invoke((Action)(() =>
+            {
+                lock (_statusTimerLock)
+                {
+                    lblStatus1.Text = " ";
+                    (sender as Timer).Stop();
+                    (sender as Timer).Dispose();
+                }
+            }));
+        }
+
         private void SetStatus(string message, TimeSpan timeout)
         {
-            lblStatus1.Text = message;
-
             lock (_statusTimerLock)
             {
-                //Make sure to cancel old timers
-                _statusTimer?.Stop();
-                _statusTimer?.Dispose();
-
-                _statusTimer = new Timer();
-                _statusTimer.Interval = (int) timeout.TotalMilliseconds;
-                _statusTimer.Tick += (s, e) =>
+                Invoke((Action)(() =>
                 {
-                    Invoke((Action)(() =>
-                    {
-                        lblStatus1.Text = string.Empty;
-                        _statusTimer?.Dispose();
-                    }));
-                };
-                _statusTimer.Start();
+                    lblStatus1.Text = message;
+
+                    //Make sure to cancel old timers
+                    _statusTimer?.Stop();
+                    _statusTimer?.Dispose();
+
+                    _statusTimer = new Timer();
+
+                    _statusTimer.Interval = (int)timeout.TotalMilliseconds;
+                    _statusTimer.Tick += ResetStatus;
+                    _statusTimer.Start();
+                }));
             }
         }
 
