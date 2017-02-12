@@ -777,7 +777,7 @@ namespace betterpad
         //Help menu handlers
         private void BetterpadHelp()
         {
-            throw new NotImplementedException();
+            //NotImplementedException();
         }
 
         private void CheckForUpdates()
