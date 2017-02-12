@@ -458,9 +458,10 @@ namespace betterpad
 
         private void Save(string path)
         {
+            bool alreadyThere = File.Exists(path);
             File.WriteAllText(path, text.Text, new UTF8Encoding(false));
             SetTitle(Path.GetFileName(path));
-            SetStatus("Changes saved");
+            SetStatus( $"{(alreadyThere ? "Changes" : "Document")} saved");
             _lastHash = DocumentHash;
 
             GC.Collect();
