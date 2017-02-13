@@ -17,7 +17,7 @@ namespace betterpad
         {
             try
             {
-                var request = WebRequest.Create("https://api.neosmart.net/GetVersionInfo/1");
+                var request = WebRequest.Create("https://api.neosmart.net/GetVersionInfo/25");
                 using (var response = request.GetResponse())
                 using (var stream = response.GetResponseStream())
                 using (var reader = new StreamReader(stream))
