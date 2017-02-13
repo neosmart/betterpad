@@ -790,7 +790,7 @@ namespace betterpad
                 var message = "Checking for updates.";
                 SetStatus(message.PadRight((int) (message.Length + (++dotCount % 4)), '.'));
             };
-            //statusTimer.Start();
+            statusTimer.Start();
             var thread = new System.Threading.Thread(() =>
             {
                 var updateManager = new UpdateManager();
@@ -805,7 +805,7 @@ namespace betterpad
                 }
                 else if (updateManager.UpdateAvailable(version))
                 {
-                    SetStatus("Update available! Lauching download in new window.", TimeSpan.FromSeconds(10));
+                    SetStatus("Update available! Launching download in new window.", TimeSpan.FromSeconds(10));
                     using (var process = new Process())
                     {
                         process.StartInfo = new ProcessStartInfo(version.DownloadUrl ?? version.InfoUrl);
