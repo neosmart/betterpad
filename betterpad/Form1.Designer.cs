@@ -23,7 +23,6 @@
             this.menuStrip1 = new System.Windows.Forms.MainMenu(this.components);
             this.fileToolStripMenuItem = new System.Windows.Forms.MenuItem();
             this.newToolStripMenuItem = new System.Windows.Forms.MenuItem();
-            this.newWindowToolStripMenuItem = new System.Windows.Forms.MenuItem();
             this.openToolStripMenuItem = new System.Windows.Forms.MenuItem();
             this.saveToolStripMenuItem = new System.Windows.Forms.MenuItem();
             this.saveAsToolStripMenuItem = new System.Windows.Forms.MenuItem();
@@ -56,12 +55,12 @@
             this.helpToolStripMenuItem = new System.Windows.Forms.MenuItem();
             this.viewHelpToolStripMenuItem = new System.Windows.Forms.MenuItem();
             this.MenuItem6 = new System.Windows.Forms.MenuItem();
+            this.checkForUpdateMenuItem = new System.Windows.Forms.MenuItem();
             this.aboutBetterpadToolStripMenuItem = new System.Windows.Forms.MenuItem();
             this.contextMenuStrip1 = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.testbox = new System.Windows.Forms.Label();
             this.mainMenu1 = new System.Windows.Forms.MainMenu(this.components);
             this.text = new betterpad.BetterRichTextBox();
-            this.checkForUpdateMenuItem = new System.Windows.Forms.MenuItem();
             this.statusStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -102,7 +101,6 @@
             this.fileToolStripMenuItem.Index = 0;
             this.fileToolStripMenuItem.MenuItems.AddRange(new System.Windows.Forms.MenuItem[] {
             this.newToolStripMenuItem,
-            this.newWindowToolStripMenuItem,
             this.openToolStripMenuItem,
             this.saveToolStripMenuItem,
             this.saveAsToolStripMenuItem,
@@ -119,57 +117,51 @@
             this.newToolStripMenuItem.Shortcut = System.Windows.Forms.Shortcut.CtrlN;
             this.newToolStripMenuItem.Text = "&New";
             // 
-            // newWindowToolStripMenuItem
-            // 
-            this.newWindowToolStripMenuItem.Index = 1;
-            this.newWindowToolStripMenuItem.Shortcut = System.Windows.Forms.Shortcut.CtrlShiftN;
-            this.newWindowToolStripMenuItem.Text = "New &Window";
-            // 
             // openToolStripMenuItem
             // 
-            this.openToolStripMenuItem.Index = 2;
+            this.openToolStripMenuItem.Index = 1;
             this.openToolStripMenuItem.Shortcut = System.Windows.Forms.Shortcut.CtrlO;
             this.openToolStripMenuItem.Text = "&Open";
             // 
             // saveToolStripMenuItem
             // 
-            this.saveToolStripMenuItem.Index = 3;
+            this.saveToolStripMenuItem.Index = 2;
             this.saveToolStripMenuItem.Shortcut = System.Windows.Forms.Shortcut.CtrlS;
             this.saveToolStripMenuItem.Text = "&Save";
             // 
             // saveAsToolStripMenuItem
             // 
-            this.saveAsToolStripMenuItem.Index = 4;
+            this.saveAsToolStripMenuItem.Index = 3;
             this.saveAsToolStripMenuItem.Shortcut = System.Windows.Forms.Shortcut.CtrlShiftS;
             this.saveAsToolStripMenuItem.Text = "Save &As";
             // 
             // MenuItem4
             // 
-            this.MenuItem4.Index = 5;
+            this.MenuItem4.Index = 4;
             this.MenuItem4.Text = "-";
             // 
             // pageSetupToolStripMenuItem
             // 
-            this.pageSetupToolStripMenuItem.Index = 6;
+            this.pageSetupToolStripMenuItem.Index = 5;
             this.pageSetupToolStripMenuItem.Text = "Page &Setup";
             this.pageSetupToolStripMenuItem.Visible = false;
             // 
             // printToolStripMenuItem
             // 
-            this.printToolStripMenuItem.Index = 7;
+            this.printToolStripMenuItem.Index = 6;
             this.printToolStripMenuItem.Shortcut = System.Windows.Forms.Shortcut.CtrlP;
             this.printToolStripMenuItem.Text = "&Print";
             this.printToolStripMenuItem.Visible = false;
             // 
             // MenuItem5
             // 
-            this.MenuItem5.Index = 8;
+            this.MenuItem5.Index = 7;
             this.MenuItem5.Text = "-";
             this.MenuItem5.Visible = false;
             // 
             // exitToolStripMenuItem
             // 
-            this.exitToolStripMenuItem.Index = 9;
+            this.exitToolStripMenuItem.Index = 8;
             this.exitToolStripMenuItem.Shortcut = System.Windows.Forms.Shortcut.AltF4;
             this.exitToolStripMenuItem.Text = "E&xit";
             // 
@@ -331,6 +323,11 @@
             this.MenuItem6.Index = 1;
             this.MenuItem6.Text = "-";
             // 
+            // checkForUpdateMenuItem
+            // 
+            this.checkForUpdateMenuItem.Index = 2;
+            this.checkForUpdateMenuItem.Text = "Check for &Update";
+            // 
             // aboutBetterpadToolStripMenuItem
             // 
             this.aboutBetterpadToolStripMenuItem.Index = 3;
@@ -375,11 +372,6 @@
             this.text.TextMode = betterpad.BetterRichTextBox.TEXTMODE.TM_PLAINTEXT;
             this.text.SelectionChanged += new System.EventHandler(this.text_SelectionChanged);
             this.text.TextChanged += new System.EventHandler(this.text_TextChanged);
-            // 
-            // checkForUpdateMenuItem
-            // 
-            this.checkForUpdateMenuItem.Index = 2;
-            this.checkForUpdateMenuItem.Text = "Check for &Update";
             // 
             // Form1
             // 
@@ -449,7 +441,6 @@
         private System.Windows.Forms.MenuItem MenuItem6;
         private System.Windows.Forms.MenuItem aboutBetterpadToolStripMenuItem;
         private System.Windows.Forms.Label testbox;
-        private System.Windows.Forms.MenuItem newWindowToolStripMenuItem;
         private System.Windows.Forms.MainMenu mainMenu1;
         private BetterRichTextBox text;
         private System.Windows.Forms.MenuItem newToolStripMenuItem;

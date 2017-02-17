@@ -139,7 +139,7 @@ namespace betterpad
             _shortcuts = new Dictionary<Keys, Action>
             {
                 //File menu
-                { Keys.Control | Keys.N, New },
+                { Keys.Control | Keys.N, NewWindow },
                 { Keys.Control | Keys.Shift | Keys.N, NewWindow },
                 { Keys.Control | Keys.O, Open },
                 { Keys.Control | Keys.Shift | Keys.O, OpenNew },
@@ -168,8 +168,7 @@ namespace betterpad
             var handlers = new Dictionary<MenuItem, Action>
             {
                 //File menu
-                { newToolStripMenuItem, New },
-                { newWindowToolStripMenuItem, NewWindow },
+                { newToolStripMenuItem, NewWindow },
                 { openToolStripMenuItem, Open },
                 { saveToolStripMenuItem, () => { Save(); } },
                 { saveAsToolStripMenuItem, SaveAs },
@@ -266,30 +265,6 @@ namespace betterpad
         }
 
         //File menu handlers
-        private void New()
-        {
-            if (!UnsavedChanges())
-            {
-                return;
-            }
-
-            _ignoreChanges = true; //So Close() doesn't trigger another warning
-
-            //set properties for new window
-            var actions = new WindowManager.NewFormActions()
-            {
-                BeforeShow = (form) =>
-                {
-                    form.Size = Size;
-                    form.StartPosition = FormStartPosition.Manual;
-                    form.Location = Location;
-                }
-            };
-            WindowManager.CreateNewWindow(actions);
-
-            Close();
-        }
-
         private void NewWindow()
         {
             WindowManager.CreateNewWindow();
@@ -297,6 +272,13 @@ namespace betterpad
 
         private void Open()
         {
+            var inNewWindow = DocumentChanged || text.Text.Length != 0;
+            if (inNewWindow)
+            {
+                OpenNew();
+                return;
+            }
+
             bool documentChanged = false;
             if (!UnsavedChanges(ref documentChanged))
             {
@@ -1012,7 +994,7 @@ namespace betterpad
 
         private void DragDropHandler(object sender, DragEventArgs e)
         {
-            var inNewWindow = DocumentChanged && text.Text.Length == 0;
+            var inNewWindow = DocumentChanged || text.Text.Length != 0;
             var paths = (string[])e.Data.GetData(DataFormats.FileDrop);
             foreach (var path in paths)
             {
