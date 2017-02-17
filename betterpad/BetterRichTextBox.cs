@@ -23,6 +23,10 @@ namespace betterpad
             {
                 Win32Handle = Handle;
             };
+            HandleDestroyed += (s, e) =>
+            {
+                Win32Handle = IntPtr.Zero;
+            };
         }
 
         private Padding _padding = Padding.Empty;

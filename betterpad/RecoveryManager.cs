@@ -63,14 +63,9 @@ namespace betterpad
             }
         }
 
-        public int CreateRecoveryData()
-        {
-            return CreateRecoveryData(null);
-        }
-
         public int CreateRecoveryData(IntPtr param)
         {
-            return CreateRecoveryData();
+            return CreateRecoveryData(null);
         }
 
         public int CreateRecoveryData(string path)
@@ -83,10 +78,15 @@ namespace betterpad
 
             try
             {
+                IEnumerable<string> oldFiles = null;
                 var tempDir = path ?? Path.Combine(Path.GetTempPath(), _appName + "-" + Path.GetRandomFileName());
                 if (!Directory.Exists(tempDir))
                 {
                     Directory.CreateDirectory(tempDir);
+                }
+                else
+                {
+                    oldFiles = Directory.GetFiles(tempDir);
                 }
 
                 foreach (var form in WindowManager.ActiveDocuments)
@@ -122,17 +122,27 @@ namespace betterpad
                     }
                 }
 
-                //If we already backed up before, delete the old backup
-                if (!string.IsNullOrEmpty(_lastDumpDirectory))
+                if (_lastDumpDirectory != tempDir)
                 {
-                    try
+                    //If we already backed up before, delete the old backup
+                    if (!string.IsNullOrEmpty(_lastDumpDirectory))
                     {
-
-                        Directory.Delete(_lastDumpDirectory, true);
+                        try
+                        {
+                            Directory.Delete(_lastDumpDirectory, true);
+                        }
+                        catch { }
                     }
-                    catch { }
+                    _lastDumpDirectory = tempDir;
                 }
-                _lastDumpDirectory = tempDir;
+                else
+                {
+                    //clear old backups from the same directory
+                    foreach (var f in oldFiles)
+                    {
+                        File.Delete(f);
+                    }
+                }
             }
             catch { }
 

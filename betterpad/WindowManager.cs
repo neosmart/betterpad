@@ -31,24 +31,13 @@ namespace betterpad
         {
 
         }
-
-        static public void CreateDump()
-        {
-            _recoveryManager.CreateRecoveryData();
-        }
-
+        
         public WindowManager()
         {
             var args = Environment.GetCommandLineArgs().Skip(1).ToArray();
 
             //Create recovery manager
             _recoveryManager.RegisterRecovery();
-
-            //Create a backup every x seconds for recovery purposes
-            var backupTimer = new System.Threading.Timer((o) =>
-            {
-                _recoveryManager.CreateRecoveryData();
-            }, null, 10 * 1000, 60 * 1000);
 
             //Check if recovery needed
             if (args.Length >= 2 && args[0] == "/recover")
@@ -67,6 +56,12 @@ namespace betterpad
                     OpenInNewWindow(path);
                 }
             }
+
+            //Create a backup every x seconds for recovery purposes, but only after any recovery finishes
+            var backupTimer = new System.Threading.Timer((o) =>
+            {
+                _recoveryManager.CreateRecoveryData(_recoveryManager.UnsafeShutdownPath);
+            }, null, 10 * 1000, 60 * 1000);
 
             //new window handler for default entity
             if (!WindowQueue.Any())
