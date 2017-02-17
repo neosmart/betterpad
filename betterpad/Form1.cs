@@ -140,9 +140,7 @@ namespace betterpad
             {
                 //File menu
                 { Keys.Control | Keys.N, NewWindow },
-                { Keys.Control | Keys.Shift | Keys.N, NewWindow },
                 { Keys.Control | Keys.O, Open },
-                { Keys.Control | Keys.Shift | Keys.O, OpenNew },
                 { Keys.Control | Keys.S, () => Save() },
                 { Keys.F12, SaveAs },
                 { Keys.Control | Keys.P, Print },
