@@ -142,6 +142,7 @@ namespace betterpad
                 { Keys.Control | Keys.N, NewWindow },
                 { Keys.Control | Keys.O, Open },
                 { Keys.Control | Keys.S, () => Save() },
+                { Keys.Control | Keys.Shift | Keys.S, SaveAs },
                 { Keys.F12, SaveAs },
                 { Keys.Control | Keys.P, Print },
                 { Keys.Control | Keys.W, Exit },
