@@ -406,16 +406,16 @@ namespace betterpad
                     })
                     {
                         var result = dialog.ShowDialog(this);
-                        GC.Collect();
                         if (result == DialogResult.OK)
                         {
                             FilePath = dialog.FileName;
                         }
                         else
                         {
-                            return false;
+                            break; //break instead of return so we can call GC.Collect()
                         }
                     }
+                    GC.Collect();
                 }
 
                 try
@@ -435,6 +435,10 @@ namespace betterpad
                 }
                 return true;
             }
+
+            //we only reach here if the save was aborted
+            GC.Collect();
+            return false;
         }
 
         private void Save(string path)
