@@ -45,12 +45,12 @@ namespace betterpad
                 var recoveryPath = args[1];
                 _recoveryManager.Recover(recoveryPath);
             }
-            else if (_recoveryManager.UnsafeShutdown)
-            {
-                _recoveryManager.Recover(_recoveryManager.UnsafeShutdownPath);
-            }
             else
             {
+                if (_recoveryManager.UnsafeShutdown)
+                {
+                    _recoveryManager.Recover(_recoveryManager.UnsafeShutdownPath);
+                }
                 foreach (var path in args)
                 {
                     OpenInNewWindow(path);
