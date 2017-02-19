@@ -51,6 +51,7 @@ namespace betterpad
                 {
                     _recoveryManager.Recover(_recoveryManager.UnsafeShutdownPath);
                 }
+                _recoveryManager.CleanUp();
                 foreach (var path in args)
                 {
                     OpenInNewWindow(path);

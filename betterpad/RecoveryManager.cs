@@ -68,6 +68,18 @@ namespace betterpad
             return CreateRecoveryData(null);
         }
 
+        public void CleanUp()
+        {
+            if (Directory.Exists(UnsafeShutdownPath))
+            {
+                try
+                {
+                    Directory.Delete(UnsafeShutdownPath, true);
+                }
+                catch { }
+            }
+        }
+
         public int CreateRecoveryData(string path)
         {
             //Protect against automated/other dumps when a shutdown dump has been triggered
