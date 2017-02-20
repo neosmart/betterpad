@@ -342,6 +342,7 @@ namespace betterpad
                 },
                 AfterShow = (form) =>
                 {
+                    form.Size = Size;
                     form.Focus();
                     form.BringToFront();
                     if (string.IsNullOrEmpty(path))
