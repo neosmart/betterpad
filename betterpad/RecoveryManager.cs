@@ -82,95 +82,104 @@ namespace betterpad
 
         public int CreateRecoveryData(string path)
         {
-            //Protect against automated/other dumps when a shutdown dump has been triggered
-            if (ShutdownInitiated && string.IsNullOrWhiteSpace(path))
+            lock (this)
             {
-                return 0;
-            }
-
-            try
-            {
-                IEnumerable<string> oldFiles = null;
-                var tempDir = path ?? Path.Combine(Path.GetTempPath(), _appName + "-" + Path.GetRandomFileName());
-                if (!Directory.Exists(tempDir))
+                //Protect against automated/other dumps when a shutdown dump has been triggered
+                if (ShutdownInitiated && string.IsNullOrWhiteSpace(path))
                 {
-                    Directory.CreateDirectory(tempDir);
-                }
-                else
-                {
-                    oldFiles = Directory.GetFiles(tempDir);
+                    return 0;
                 }
 
-                foreach (var form in WindowManager.ActiveDocuments)
+                string recoveryPath = null;
+                try
                 {
-                    //try...catch here so we can attempt to salvage at least one document
-                    try
+                    IEnumerable<string> oldFiles = null;
+                    var tempDir = path ?? Path.Combine(Path.GetTempPath(), _appName + "-" + Path.GetRandomFileName());
+                    if (!Directory.Exists(tempDir))
                     {
-                        var recoveryInfo = new RecoveryInfo();
-
-                        //We have to use special methods to prevent .NET blocking us from accessing another thread
-                        recoveryInfo.FilePath = form.FilePath;
-                        recoveryInfo.Position = form.BetterBox.Win32SelectionStart;
-                        recoveryInfo.Text = form.BetterBox.Win32Text;
-
-                        var serializationPath = Path.Combine(tempDir, Path.GetRandomFileName());
-                        using (var stream = new FileStream(serializationPath, FileMode.CreateNew))
-                        {
-                            var bf = new BinaryFormatter();
-                            bf.Serialize(stream, recoveryInfo);
-                        }
+                        Directory.CreateDirectory(tempDir);
                     }
-                    catch { }
-
-                    if (Heartbeat())
+                    else
                     {
-                        //recovery aborted
+                        oldFiles = Directory.GetFiles(tempDir);
+                    }
+
+                    foreach (var form in WindowManager.ActiveDocuments)
+                    {
+                        //try...catch here so we can attempt to salvage at least one document
                         try
                         {
-                            Directory.Delete(tempDir, true);
-                        }
-                        catch { }
-                        return 1;
-                    }
-                }
+                            var recoveryInfo = new RecoveryInfo();
 
-                if (_lastDumpDirectory != tempDir)
-                {
-                    //If we already backed up before, delete the old backup
-                    if (!string.IsNullOrEmpty(_lastDumpDirectory))
-                    {
-                        try
-                        {
-                            Directory.Delete(_lastDumpDirectory, true);
+                            //We have to use special methods to prevent .NET blocking us from accessing another thread
+                            recoveryInfo.FilePath = form.FilePath;
+                            recoveryInfo.Position = form.BetterBox.Win32SelectionStart;
+                            recoveryInfo.Text = form.BetterBox.Win32Text;
+
+                            var serializationPath = Path.Combine(tempDir, Path.GetRandomFileName());
+                            using (var stream = new FileStream(serializationPath, FileMode.CreateNew))
+                            {
+                                var bf = new BinaryFormatter();
+                                bf.Serialize(stream, recoveryInfo);
+                            }
                         }
                         catch { }
+
+                        if (Heartbeat())
+                        {
+                            //recovery aborted
+                            try
+                            {
+                                Directory.Delete(tempDir, true);
+                            }
+                            catch { }
+                            return 1;
+                        }
                     }
-                    _lastDumpDirectory = tempDir;
-                }
-                else
-                {
+
                     //clear old backups from the same directory
-                    foreach (var f in oldFiles)
+                    if (oldFiles != null)
                     {
-                        File.Delete(f);
+                        foreach (var f in oldFiles)
+                        {
+                            File.Delete(f);
+                        }
+                    }
+
+                    recoveryPath = tempDir;
+                    if (path == null)
+                    {
+                        //recovery path was automatically generated
+                        if (!string.IsNullOrEmpty(_lastDumpDirectory))
+                        {
+                            try
+                            {
+                                Directory.Delete(_lastDumpDirectory, true);
+                            }
+                            catch { }
+                        }
+                        _lastDumpDirectory = recoveryPath;
                     }
                 }
-            }
-            catch { }
+                catch
+                {
+                    recoveryPath = null;
+                }
 
-            GC.Collect();
+                GC.Collect();
 
-            if (!string.IsNullOrEmpty(_lastDumpDirectory))
-            {
-                //Now ask Windows to restart us at next run
-                RegisterApplicationRestart($"/recover {_lastDumpDirectory}", 0);
-                ApplicationRecoveryFinished(true);
-                return 0;
-            }
-            else
-            {
-                ApplicationRecoveryFinished(false);
-                return -1;
+                if (!string.IsNullOrEmpty(recoveryPath))
+                {
+                    //Now ask Windows to restart us at next run
+                    RegisterApplicationRestart($"/recover {recoveryPath}", 0);
+                    ApplicationRecoveryFinished(true);
+                    return 0;
+                }
+                else
+                {
+                    ApplicationRecoveryFinished(false);
+                    return -1;
+                }
             }
         }
 
@@ -221,7 +230,8 @@ namespace betterpad
             try
             {
                 GC.Collect();
-                Directory.Delete(recoveryPath, true);
+                //Don't delete recovery data until new recovery data is available
+                //Directory.Delete(recoveryPath, true);
             }
             catch { }
 

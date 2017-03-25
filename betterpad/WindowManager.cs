@@ -44,6 +44,11 @@ namespace betterpad
             {
                 var recoveryPath = args[1];
                 _recoveryManager.Recover(recoveryPath);
+                try
+                {
+                    Directory.Delete(recoveryPath, true);
+                }
+                catch { }
             }
             else
             {
@@ -51,7 +56,8 @@ namespace betterpad
                 {
                     _recoveryManager.Recover(_recoveryManager.UnsafeShutdownPath);
                 }
-                _recoveryManager.CleanUp();
+                //save unsafe shutdown data until a new backup exists or we exit cleanly
+                //_recoveryManager.CleanUp();
                 foreach (var path in args)
                 {
                     OpenInNewWindow(path);
