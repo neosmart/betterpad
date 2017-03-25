@@ -140,7 +140,7 @@ namespace betterpad
             {
                 //File menu
                 { Keys.Control | Keys.N, NewWindow },
-                { Keys.Control | Keys.O, Open },
+                { Keys.Control | Keys.O, () => Open() },
                 { Keys.Control | Keys.S, () => Save() },
                 { Keys.Control | Keys.Shift | Keys.S, SaveAs },
                 { Keys.F12, SaveAs },
@@ -168,8 +168,8 @@ namespace betterpad
             {
                 //File menu
                 { newToolStripMenuItem, NewWindow },
-                { openToolStripMenuItem, Open },
-                { saveToolStripMenuItem, () => { Save(); } },
+                { openToolStripMenuItem, () => Open() },
+                { saveToolStripMenuItem, () => Save() },
                 { saveAsToolStripMenuItem, SaveAs },
                 { pageSetupToolStripMenuItem, PageSetup },
                 { printToolStripMenuItem, Print },
@@ -269,22 +269,23 @@ namespace betterpad
             WindowManager.CreateNewWindow();
         }
 
-        private void Open()
+        private bool Open()
         {
             var inNewWindow = DocumentChanged || text.Text.Length != 0;
             if (inNewWindow)
             {
                 OpenNew();
-                return;
+                return true;
             }
 
             bool documentChanged = false;
             if (!UnsavedChanges(ref documentChanged))
             {
-                return;
+                return false;
             }
             documentChanged = documentChanged || !string.IsNullOrEmpty(FilePath) || text.Text != "";
 
+            bool result = true;
             using (var dialog = new OpenFileDialog()
             {
                 AutoUpgradeEnabled = true,
@@ -318,8 +319,13 @@ namespace betterpad
                         OpenNew(doc, false);
                     }
                 }
+                else
+                {
+                    result = false;
+                }
             }
             GC.Collect();
+            return result;
         }
 
         private void OpenNew()
@@ -339,21 +345,30 @@ namespace betterpad
                         form.StartPosition = FormStartPosition.Manual;
                         form.Location = Location;
                     }
+                    form.Visible = false;
                 },
                 AfterShow = (form) =>
                 {
                     form.Size = Size;
-                    form.Focus();
-                    form.BringToFront();
+                    form.Hide();
                     if (string.IsNullOrEmpty(path))
                     {
-                        form.Open();
+                        if (!form.Open())
+                        {
+                            form.Close();
+                            DecrementDocumentNumber();
+                            return;
+                        }
                     }
                     else
                     {
                         form.Open(path);
                         DecrementDocumentNumber();
                     }
+
+                    form.Show();
+                    form.Focus();
+                    form.BringToFront();
                 }
             };
             WindowManager.CreateNewWindow(actions);
