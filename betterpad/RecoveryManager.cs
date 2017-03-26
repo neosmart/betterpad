@@ -218,8 +218,16 @@ namespace betterpad
                                 {
                                     form.Open(recoveryInfo.FilePath);
                                 }
-                                form.BetterBox.Text = recoveryInfo.Text;
-                                form.BetterBox.SelectionStart = recoveryInfo.Position;
+
+                                //only restore text if backup is newer than destination (or destination does not exist)
+                                var lastWrite = File.Exists(recoveryInfo.FilePath) ? File.GetLastWriteTimeUtc(recoveryInfo.FilePath) : (DateTime?)null;
+                                var backupWrite = File.GetLastWriteTimeUtc(file);
+
+                                if (lastWrite == null || lastWrite < backupWrite)
+                                {
+                                    form.BetterBox.Text = recoveryInfo.Text;
+                                    form.BetterBox.SelectionStart = recoveryInfo.Position;
+                                }
                             }
                         });
                     }
