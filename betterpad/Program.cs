@@ -27,6 +27,11 @@ namespace betterpad
                     BringToForeground(Environment.GetCommandLineArgs().Skip(1));
                     return;
                 }
+
+                //register application path in HKCU registry
+                var setup = new Setup();
+                setup.RegisterAppPath();
+
                 if (Environment.OSVersion.Version.Major >= 6)
                 {
                     Win32.SetProcessDPIAware();
