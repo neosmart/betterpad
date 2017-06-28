@@ -65,7 +65,8 @@ namespace betterpad
                 {
                     foreach (var path in paths)
                     {
-                        Win32.SendWindowsStringMessage(process.MainWindowHandle, 0, path, IntPtr.Zero);
+                        var fullPath = Path.GetFullPath(path);
+                        Win32.SendWindowsStringMessage(process.MainWindowHandle, 0, fullPath, IntPtr.Zero);
                     }
                 }
             }
