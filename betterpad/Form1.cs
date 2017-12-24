@@ -393,8 +393,13 @@ namespace betterpad
                 return;
             }
 
-            var data = File.ReadAllText(path, Encoding.UTF8);
-            text.Text = data;
+            //File.ReadAllText causes an access violation when the file is being written to
+            //var data = File.ReadAllText(path, Encoding.UTF8);
+            using (var file = File.Open(path, FileMode.Open, FileAccess.Read, FileShare.Read | FileShare.Write | FileShare.Delete))
+            using (var reader = new StreamReader(file, Encoding.UTF8))
+            {
+                text.Text = reader.ReadToEnd();
+            }
             var justCreated = (DateTime.UtcNow - File.GetCreationTimeUtc(path)) < TimeSpan.FromMilliseconds(1000);
             SetStatus(string.Format("Document {0}", justCreated ? "created" : "loaded"));
             _lastHash = DocumentHash;
