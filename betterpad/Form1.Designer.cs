@@ -71,30 +71,30 @@
             this.lblStatus1,
             this.lblStatus2,
             this.locationLabel});
-            this.statusStrip1.Location = new System.Drawing.Point(0, 666);
+            this.statusStrip1.Location = new System.Drawing.Point(0, 554);
             this.statusStrip1.Name = "statusStrip1";
-            this.statusStrip1.Padding = new System.Windows.Forms.Padding(2, 0, 15, 0);
-            this.statusStrip1.Size = new System.Drawing.Size(1007, 35);
+            this.statusStrip1.Padding = new System.Windows.Forms.Padding(2, 0, 12, 0);
+            this.statusStrip1.Size = new System.Drawing.Size(824, 30);
             this.statusStrip1.TabIndex = 0;
             this.statusStrip1.Text = "statusStrip1";
             // 
             // lblStatus1
             // 
             this.lblStatus1.Name = "lblStatus1";
-            this.lblStatus1.Size = new System.Drawing.Size(102, 30);
+            this.lblStatus1.Size = new System.Drawing.Size(89, 25);
             this.lblStatus1.Text = "lblStatus1";
             // 
             // lblStatus2
             // 
             this.lblStatus2.Name = "lblStatus2";
-            this.lblStatus2.Size = new System.Drawing.Size(888, 30);
+            this.lblStatus2.Size = new System.Drawing.Size(721, 25);
             this.lblStatus2.Spring = true;
             this.lblStatus2.Text = "lblStatus2";
             // 
             // locationLabel
             // 
             this.locationLabel.Name = "locationLabel";
-            this.locationLabel.Size = new System.Drawing.Size(0, 30);
+            this.locationLabel.Size = new System.Drawing.Size(0, 25);
             // 
             // fileToolStripMenuItem
             // 
@@ -342,10 +342,9 @@
             // testbox
             // 
             this.testbox.AutoSize = true;
-            this.testbox.Location = new System.Drawing.Point(13, 137);
-            this.testbox.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.testbox.Location = new System.Drawing.Point(11, 114);
             this.testbox.Name = "testbox";
-            this.testbox.Size = new System.Drawing.Size(0, 25);
+            this.testbox.Size = new System.Drawing.Size(0, 20);
             this.testbox.TabIndex = 2;
             // 
             // mainMenu1
@@ -364,9 +363,8 @@
             this.text.Font = new System.Drawing.Font("Consolas", 11F);
             this.text.HideSelection = false;
             this.text.Location = new System.Drawing.Point(0, 0);
-            this.text.Margin = new System.Windows.Forms.Padding(4);
             this.text.Name = "text";
-            this.text.Size = new System.Drawing.Size(1007, 666);
+            this.text.Size = new System.Drawing.Size(824, 554);
             this.text.TabIndex = 0;
             this.text.Text = "";
             this.text.TextMode = betterpad.BetterRichTextBox.TEXTMODE.TM_PLAINTEXT;
@@ -376,13 +374,12 @@
             // Form1
             // 
             this.AllowDrop = true;
-            this.AutoScaleDimensions = new System.Drawing.SizeF(11F, 24F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 20F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1007, 701);
+            this.ClientSize = new System.Drawing.Size(824, 584);
             this.Controls.Add(this.text);
             this.Controls.Add(this.statusStrip1);
             this.Controls.Add(this.testbox);
-            this.Margin = new System.Windows.Forms.Padding(4);
             this.Menu = this.mainMenu1;
             this.Name = "Form1";
             this.Text = "betterpad by NeoSmart Technologies";

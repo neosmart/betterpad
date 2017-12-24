@@ -54,6 +54,7 @@
   <PropertyGroup>
     <ApplicationIcon>betterpad.ico</ApplicationIcon>
   </PropertyGroup>
+  <PropertyGroup />
   <PropertyGroup>
     <ApplicationManifest>app.manifest</ApplicationManifest>
   </PropertyGroup>
