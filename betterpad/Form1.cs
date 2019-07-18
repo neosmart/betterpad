@@ -7,8 +7,10 @@ using System.IO.MemoryMappedFiles;
 using System.Linq;
 using System.Media;
 using System.Reflection;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace betterpad
@@ -189,7 +191,7 @@ namespace betterpad
                 { statusBarToolStripMenuItem, StatusBar },
                 //Help menu
                 { viewHelpToolStripMenuItem, BetterpadHelp },
-                { checkForUpdateMenuItem, CheckForUpdates },
+                { checkForUpdateMenuItem, CheckForUpdatesAsync },
                 { aboutBetterpadToolStripMenuItem, About },
             };
 
@@ -800,46 +802,48 @@ namespace betterpad
             //NotImplementedException();
         }
 
-        private void CheckForUpdates()
+        private async void CheckForUpdatesAsync()
         {
-            var statusTimer = new Timer();
+            using var statusTimer = new Timer();
             statusTimer.Interval = 500;
+
             uint dotCount = 0;
-            statusTimer.Tick += (s, e) =>
+            void ReportUpdateCheckProgress()
             {
                 var message = "Checking for updates.";
-                SetStatus(message.PadRight((int) (message.Length + (++dotCount % 4)), '.'));
+                SetStatus(message.PadRight((int)(message.Length + (++dotCount % 4)), '.'));
             };
+
+            ReportUpdateCheckProgress();
+            statusTimer.Tick += (s, e) => ReportUpdateCheckProgress();
             statusTimer.Start();
-            var thread = new System.Threading.Thread(() =>
+
+            // The changes to the UI can be jarring if the response is immediately received. Slow it down a tad.
+            await Task.Delay(800);
+
+            var updateManager = new UpdateManager();
+            var version = await updateManager.GetLatestVersionAsync(false);
+            statusTimer.Stop();
+
+            if (version == null)
             {
-                var updateManager = new UpdateManager();
-                var version = updateManager.GetLatestVersion(false);
-                statusTimer.Stop();
-                statusTimer.Dispose();
-
-                if (version == null)
+                SystemSounds.Exclamation.Play();
+                SetStatus("Error checking for updates! Please try check your connection or try again later!");
+            }
+            else if (updateManager.UpdateAvailable(version))
+            {
+                SetStatus("Update available! Launching download in new window.", TimeSpan.FromSeconds(10));
+                using (var process = new Process())
                 {
-                    SystemSounds.Exclamation.Play();
-                    SetStatus("Error checking for updates! Please try check your connection or try again later!");
+                    process.StartInfo = new ProcessStartInfo(version.DownloadUrl ?? version.InfoUrl);
+                    process.Start();
                 }
-                else if (updateManager.UpdateAvailable(version))
-                {
-                    SetStatus("Update available! Launching download in new window.", TimeSpan.FromSeconds(10));
-                    using (var process = new Process())
-                    {
-                        process.StartInfo = new ProcessStartInfo(version.DownloadUrl ?? version.InfoUrl);
-                        process.Start();
-                    }
-                }
-                else
-                {
-                    SystemSounds.Asterisk.Play();
-                    SetStatus("No update is available.");
-                }
-
-            });
-            thread.Start();
+            }
+            else
+            {
+                SystemSounds.Asterisk.Play();
+                SetStatus("No update is available.");
+            }
         }
 
         private void About()

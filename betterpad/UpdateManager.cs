@@ -1,35 +1,30 @@
-﻿using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
 using System.Runtime.Serialization.Json;
-using System.Text;
 using System.Threading.Tasks;
-using System.Windows.Forms;
 using System.Reflection;
 
 namespace betterpad
 {
     class UpdateManager
     {
-        public VersionInfo GetLatestVersion(bool includeBeta = false)
+        public async Task<VersionInfo> GetLatestVersionAsync(bool includeBeta = false)
         {
             try
             {
                 var request = WebRequest.Create("https://api.neosmart.net/GetVersionInfo/25");
-                using (var response = request.GetResponse())
+                using (var response = await request.GetResponseAsync())
                 using (var stream = response.GetResponseStream())
-                using (var reader = new StreamReader(stream))
+                // DataContractJsonSerializer does not have a ReadObjectAsync, so we'll stream it to a new MemoryStream
+                using (var memStream = new MemoryStream())
+                using (var reader = new StreamReader(memStream))
                 {
-                    /*var serializer = new JavaScriptSerializer();
-                    var versions = serializer.Deserialize<VersionInfo[]>(reader.ReadToEnd());*/
-
-                    /*var serializer = new JsonParser();
-                    var versions = serializer.Parse<VersionInfo[]>(reader.ReadToEnd());*/
+                    await stream.CopyToAsync(memStream);
+                    memStream.Seek(0, SeekOrigin.Begin);
 
                     var serializer = new DataContractJsonSerializer(typeof(VersionInfo[]));
-                    var versions = (VersionInfo[])serializer.ReadObject(stream);
+                    var versions = (VersionInfo[])serializer.ReadObject(memStream);
 
                     return versions.Where(v => includeBeta || v.Level == ReleaseLevel.Stable).Max();
                 }
