@@ -33,30 +33,27 @@ namespace betterpad
 
         private bool DocumentChanged
         {
-            get
-            {
-                return Interop.ByteArrayCompare(DocumentHash, _lastHash) == false;
-            }
+            get => DocumentHash != _lastHash;
         }
 
-        private unsafe byte[] DocumentHash
+        private ulong DocumentHash
         {
             get
             {
-                var bytes = new byte[sizeof(char) * text.Text.Length];
-                fixed (void* ptr = text.Text)
+                unsafe
                 {
-                    System.Runtime.InteropServices.Marshal.Copy(new IntPtr(ptr), bytes, 0, bytes.Length);
+                    fixed (char* ptr = text.Text)
+                    {
+                        MetroHash.MetroHash.Hash64_1((byte*)ptr, 0, sizeof(char) * (uint)text.Text.Length, 0, out var hash);
+                        return hash;
+                    }
                 }
-
-                MetroHash.MetroHash.Hash64_1(bytes, 0, (uint) bytes.Length, 0, out var hash);
-                return hash;
             }
         }
 
         public Action<Form1> StartAction { get; internal set; }
 
-        private byte[] _lastHash;
+        private ulong _lastHash;
 
         public Form1()
         {

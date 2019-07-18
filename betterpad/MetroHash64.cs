@@ -1,4 +1,4 @@
-﻿
+
 using System;
 
 namespace MetroHash
@@ -23,7 +23,22 @@ namespace MetroHash
                 throw new IndexOutOfRangeException("Given Key for hashing is not of expected length");
             }
 
-            ulong lHash = ((lSeed + K2_64_1) * K0_64_1) + lLength;
+            unsafe
+            {
+                fixed (byte* ptr = lKey)
+                {
+                    Hash64_1(ptr, lStartOffset, lLength, lSeed, out ulong lHash);
+                    lOutput = BitConverter.GetBytes(lHash);
+                }
+            }
+        }
+
+        public static unsafe void Hash64_1(byte* lKey, uint lStartOffset, uint lLength, uint lSeed, out ulong lHash)
+        {
+            uint lKeyIndex = lStartOffset;
+            uint lKeyEnd = lKeyIndex + lLength;
+
+            lHash = ((lSeed + K2_64_1) * K0_64_1) + lLength;
 
             if (lLength >= 32)
             {
@@ -31,10 +46,10 @@ namespace MetroHash
 
                 do
                 {
-                    lV[0] += Read_u64(lKey, lKeyIndex) * K0_64_1; lKeyIndex += 8; lV[0] = RotateRight(lV[0],29) + lV[2];
-                    lV[1] += Read_u64(lKey, lKeyIndex) * K1_64_1; lKeyIndex += 8; lV[1] = RotateRight(lV[1],29) + lV[3];
-                    lV[2] += Read_u64(lKey, lKeyIndex) * K2_64_1; lKeyIndex += 8; lV[2] = RotateRight(lV[2],29) + lV[0];
-                    lV[3] += Read_u64(lKey, lKeyIndex) * K3_64_1; lKeyIndex += 8; lV[3] = RotateRight(lV[3],29) + lV[1];
+                    lV[0] += (*(ulong *)(lKey + lKeyIndex)) * K0_64_1; lKeyIndex += 8; lV[0] = RotateRight(lV[0],29) + lV[2];
+                    lV[1] += (*(ulong *)(lKey + lKeyIndex)) * K1_64_1; lKeyIndex += 8; lV[1] = RotateRight(lV[1],29) + lV[3];
+                    lV[2] += (*(ulong *)(lKey + lKeyIndex)) * K2_64_1; lKeyIndex += 8; lV[2] = RotateRight(lV[2],29) + lV[0];
+                    lV[3] += (*(ulong *)(lKey + lKeyIndex)) * K3_64_1; lKeyIndex += 8; lV[3] = RotateRight(lV[3],29) + lV[1];
                 }
                 while (lKeyIndex <= (lKeyEnd - 32));
 
@@ -47,8 +62,8 @@ namespace MetroHash
 
             if ((lKeyEnd - lKeyIndex) >= 16)
             {
-                ulong lV0 = lHash + (Read_u64(lKey, lKeyIndex) * K0_64_1); lKeyIndex += 8; lV0 = RotateRight(lV0,33) * K1_64_1;
-                ulong lV1 = lHash + (Read_u64(lKey, lKeyIndex) * K1_64_1); lKeyIndex += 8; lV1 = RotateRight(lV1,33) * K2_64_1;
+                ulong lV0 = lHash + ((*(UInt64 *)(lKey + lKeyIndex)) * K0_64_1); lKeyIndex += 8; lV0 = RotateRight(lV0,33) * K1_64_1;
+                ulong lV1 = lHash + ((*(UInt64 *)(lKey + lKeyIndex)) * K1_64_1); lKeyIndex += 8; lV1 = RotateRight(lV1,33) * K2_64_1;
                 lV0 ^= RotateRight(lV0 * K0_64_1, 35) + lV1;
                 lV1 ^= RotateRight(lV1 * K3_64_1, 35) + lV0;
                 lHash += lV1;
@@ -56,34 +71,32 @@ namespace MetroHash
 
             if ((lKeyEnd - lKeyIndex) >= 8)
             {
-                lHash += Read_u64(lKey, lKeyIndex) * K3_64_1; lKeyIndex += 8;
+                lHash += (*(UInt64 *)(lKey + lKeyIndex)) * K3_64_1; lKeyIndex += 8;
                 lHash ^= RotateRight(lHash, 33) * K1_64_1;
 
             }
 
             if ((lKeyEnd - lKeyIndex) >= 4)
             {
-                lHash += Read_u32(lKey, lKeyIndex) * K3_64_1; lKeyIndex += 4;
+                lHash += (*(UInt32*)(lKey + lKeyIndex)) * K3_64_1; lKeyIndex += 4;
                 lHash ^= RotateRight(lHash, 15) * K1_64_1;
             }
 
             if ((lKeyEnd - lKeyIndex) >= 2)
             {
-                lHash += Read_u16(lKey, lKeyIndex) * K3_64_1; lKeyIndex += 2;
+                lHash += (*(UInt16*)(lKey + lKeyIndex)) * K3_64_1; lKeyIndex += 2;
                 lHash ^= RotateRight(lHash, 13) * K1_64_1;
             }
 
             if ((lKeyEnd - lKeyIndex) >= 1)
             {
-                lHash += Read_u8(lKey, lKeyIndex) * K3_64_1;
+                lHash += (*(byte*)(lKey + lKeyIndex)) * K3_64_1;
                 lHash ^= RotateRight(lHash, 25) * K1_64_1;
             }
 
             lHash ^= RotateRight(lHash, 33);
             lHash *= K0_64_1;
             lHash ^= RotateRight(lHash, 33);
-
-            lOutput = BitConverter.GetBytes(lHash);
         }
 
         //---------------------------------------------------------------------------//
