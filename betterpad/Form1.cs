@@ -1,8 +1,5 @@
-using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Diagnostics;
 using System.Drawing;
 using System.IO;
@@ -11,6 +8,7 @@ using System.Linq;
 using System.Media;
 using System.Reflection;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Windows.Forms;
 
 namespace betterpad
@@ -768,17 +766,30 @@ namespace betterpad
             statusStrip1.Visible = statusBarToolStripMenuItem.Checked;
         }
 
+        // Used to store the font as returned by the font selector, as we don't apply it directly
+        private static Regex NonStandardFontWeightRegex = new Regex(@"Thin|Light|Medium|Bold|Heavy|Black",
+            RegexOptions.IgnoreCase | RegexOptions.Compiled);
         private void ConfigureFont()
         {
-            using (var fontDialog = new FontDialog())
+            using (var fontDialog = new FontDialog()
             {
-                fontDialog.Font = text.Font;
-                fontDialog.FontMustExist = true;
-                fontDialog.AllowVectorFonts = true;
-                fontDialog.AllowVerticalFonts = false;
+                Font = text.Font,
+                FontMustExist = true,
+                AllowVectorFonts = true,
+                AllowVerticalFonts = false,
+            })
+            {
                 if (fontDialog.ShowDialog(this) == DialogResult.OK)
                 {
-                    text.Font = fontDialog.Font;
+                    // Hack in support for non-standard font weights, broken in System.Windows.Forms
+                    // It is expecting a font family with different (limited) styles. Modern fonts
+                    // are seen as having a family per style, with the FontStyle set to Regular.
+                    var font = fontDialog.Font;
+                    if (NonStandardFontWeightRegex.IsMatch(font.FontFamily.Name))
+                    {
+                        font = new Font(font, font.Style & ~FontStyle.Bold);
+                    }
+                    text.Font = font;
                 }
             }
         }
