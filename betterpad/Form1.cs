@@ -1,4 +1,4 @@
-﻿using Microsoft.Win32;
+using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -142,8 +142,8 @@ namespace betterpad
                 { Keys.Control | Keys.N, NewWindow },
                 { Keys.Control | Keys.O, () => Open() },
                 { Keys.Control | Keys.S, () => Save() },
-                { Keys.Control | Keys.Shift | Keys.S, SaveAs },
-                { Keys.F12, SaveAs },
+                { Keys.Control | Keys.Shift | Keys.S, () => SaveAs() },
+                { Keys.F12, () => SaveAs() },
                 { Keys.Control | Keys.P, Print },
                 { Keys.Control | Keys.W, Exit },
                 //Edit menu
@@ -170,7 +170,7 @@ namespace betterpad
                 { newToolStripMenuItem, NewWindow },
                 { openToolStripMenuItem, () => Open() },
                 { saveToolStripMenuItem, () => Save() },
-                { saveAsToolStripMenuItem, SaveAs },
+                { saveAsToolStripMenuItem, () => SaveAs() },
                 { pageSetupToolStripMenuItem, PageSetup },
                 { printToolStripMenuItem, Print },
                 { exitToolStripMenuItem, Close },
@@ -407,11 +407,11 @@ namespace betterpad
             GC.Collect();
         }
 
-        private bool Save()
+        private bool SaveAs(string filePath = null)
         {
             while (true)
             {
-                if (string.IsNullOrEmpty(FilePath))
+                if (string.IsNullOrEmpty(filePath))
                 {
                     using (var dialog = new SaveFileDialog()
                     {
@@ -426,61 +426,67 @@ namespace betterpad
                         Filter = "Text Files (*.txt)|*.txt|Log Files (*.log)|*.log"
                     })
                     {
-                        var result = dialog.ShowDialog(this);
-                        if (result == DialogResult.OK)
+                        if (dialog.ShowDialog(this) != DialogResult.OK)
                         {
-                            FilePath = dialog.FileName;
+                            return false;
                         }
-                        else
-                        {
-                            break; //break instead of return so we can call GC.Collect()
-                        }
+
+                        filePath = dialog.FileName;
                     }
-                    GC.Collect();
                 }
 
-                try
+                if (!Save(filePath, out var abort))
                 {
-                    Save(FilePath);
-                }
-                catch (UnauthorizedAccessException)
-                {
-                    var result = MessageBox.Show(this, $"Unable to save document to path {FilePath}. Please select a different path and try again.",
-                        "Access denied!", MessageBoxButtons.OKCancel, MessageBoxIcon.Error, MessageBoxDefaultButton.Button1);
-                    if (result == DialogResult.OK)
+                    if (abort)
                     {
-                        FilePath = null;
-                        continue;
+                        return false;
                     }
-                    return false;
+                    continue;
                 }
+
+                FilePath = filePath;
                 return true;
             }
-
-            //we only reach here if the save was aborted
-            GC.Collect();
-            return false;
         }
 
-        private void Save(string path)
+        private bool Save()
+        {
+            return SaveAs(FilePath);
+        }
+
+        private bool Save(string path, out bool abort)
         {
             bool alreadyThere = File.Exists(path);
-            File.WriteAllText(path, text.Text, new UTF8Encoding(false));
-            SetTitle(Path.GetFileName(path));
-            SetStatus( $"{(alreadyThere ? "Changes" : "Document")} saved");
-            _lastHash = DocumentHash;
 
-            GC.Collect();
-        }
-
-        private void SaveAs()
-        {
-            var oldPath = FilePath;
-            FilePath = null;
-            if (!Save())
+            try
             {
-                FilePath = oldPath;
+                File.WriteAllText(path, text.Text, new UTF8Encoding(false));
+                SetTitle(Path.GetFileName(path));
+                SetStatus($"{(alreadyThere ? "Changes" : "Document")} saved");
             }
+            catch (UnauthorizedAccessException)
+            {
+                var result = MessageBox.Show(this,
+                    $"Unable to save document to path {path}. " +
+                    "Please select a different path and try again.",
+                    "Access denied!", MessageBoxButtons.OKCancel, MessageBoxIcon.Error,
+                    MessageBoxDefaultButton.Button1);
+
+                abort = result == DialogResult.Cancel;
+                return false;
+            }
+            catch (Exception ex)
+            {
+                var dialogResult = MessageBox.Show(this, ex.Message, "Error saving file!",
+                    MessageBoxButtons.RetryCancel, MessageBoxIcon.Error);
+
+                abort = dialogResult == DialogResult.Cancel;
+                return false;
+            }
+
+            abort = true;
+            _lastHash = DocumentHash;
+            return true;
         }
 
         private void PageSetup()
