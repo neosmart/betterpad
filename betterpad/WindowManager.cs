@@ -1,9 +1,7 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Messaging;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -14,12 +12,12 @@ namespace betterpad
     {
         public struct NewFormActions
         {
-            public Action<Form1> BeforeShow;
-            public Action<Form1> AfterShow;
+            public Action<EditorWindow> BeforeShow;
+            public Func<EditorWindow, Task> AfterShow;
         }
 
-        private static List<Form1> _activeWindows = new List<Form1>();
-        public static IEnumerable<Form1> ActiveDocuments => _activeWindows;
+        private static List<EditorWindow> _activeWindows = new List<EditorWindow>();
+        public static IEnumerable<EditorWindow> ActiveDocuments => _activeWindows;
         private static Queue<NewFormActions> WindowQueue = new Queue<NewFormActions>();
         private static Semaphore CreateWindowEvent = new Semaphore(0, 256);
         private static ManualResetEvent AllWindowsClosed = new ManualResetEvent(false);
@@ -27,12 +25,11 @@ namespace betterpad
         private static RecoveryManager _recoveryManager = new RecoveryManager();
         private int ThreadCounter = 0;
 
-        private static void ThreadRunner()
-        {
-
-        }
-        
         public WindowManager()
+        {
+        }
+
+        public async Task StartAsync()
         {
             var args = Environment.GetCommandLineArgs().Skip(1).ToArray();
 
@@ -80,32 +77,53 @@ namespace betterpad
             bool done = false;
             AppDomain.CurrentDomain.ProcessExit += (sender, e) =>
             {
-                while (!done) ;
+                while (!done)
+                {
+                    Thread.Yield();
+                };
             };
 
+            CancellationTokenSource cancelAll = new CancellationTokenSource();
+            List<Task> activeWindows = new List<Task>();
             while (!done)
             {
                 switch (WaitHandle.WaitAny(waitHandles))
                 {
                     case 0:
+                        // Threads registering drag-and-drop handlers must be STA
                         var thread = new Thread(() =>
                         {
                             Interlocked.Increment(ref ThreadCounter);
-                            if (WindowQueue.Any())
+                            try
                             {
-                                using (var form = new Form1())
+                                if (WindowQueue.Any())
                                 {
-                                    _activeWindows.Add(form);
-                                    var handler = WindowQueue.Dequeue();
-                                    handler.BeforeShow?.Invoke(form);
-                                    form.StartAction = handler.AfterShow;
-                                    form.ShowDialog();
-                                    _activeWindows.Remove(form);
+                                    using (var form = new EditorWindow()
+                                    {
+                                        Cancel = cancelAll.Token
+                                    })
+                                    {
+                                        _activeWindows.Add(form);
+                                        var handler = WindowQueue.Dequeue();
+                                        handler.BeforeShow?.Invoke(form);
+                                        if (handler.AfterShow != null)
+                                        {
+                                            form.Shown += async (s, e) =>
+                                            {
+                                                await handler.AfterShow(form);
+                                            };
+                                        }
+                                        form.ShowDialog();
+                                        _activeWindows.Remove(form);
+                                    }
                                 }
                             }
-                            if (Interlocked.Decrement(ref ThreadCounter) == 0)
+                            finally
                             {
-                                AllWindowsClosed.Set();
+                                if (Interlocked.Decrement(ref ThreadCounter) == 0)
+                                {
+                                    AllWindowsClosed.Set();
+                                }
                             }
                         });
                         thread.SetApartmentState(ApartmentState.STA);
@@ -120,7 +138,10 @@ namespace betterpad
                 }
             }
 
-            //Delete the unsafe shutdown folder if this is a clean shutdown
+            cancelAll.Cancel();
+            await Task.WhenAll(activeWindows);
+
+            // Delete the unsafe shutdown folder if this is a clean shutdown
             if (!RecoveryManager.ShutdownInitiated && Directory.Exists(_recoveryManager.UnsafeShutdownPath))
             {
                 try
@@ -138,9 +159,9 @@ namespace betterpad
         {
             var openAction = new NewFormActions()
             {
-                AfterShow = (f) =>
+                AfterShow = async (f) =>
                 {
-                    f.Open(path);
+                    await f.OpenAsync(path);
                     f.Focus();
                 }
             };

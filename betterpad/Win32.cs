@@ -1,9 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+using System;
 using System.Runtime.InteropServices;
 using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace betterpad
@@ -12,10 +9,10 @@ namespace betterpad
     {
         public struct COPYDATASTRUCT
         {
-            public IntPtr dwData;
-            public int cbData;
+            public IntPtr Data;
+            public int Length;
             [MarshalAs(UnmanagedType.LPStr)]
-            public string message;
+            public string Messag;
         }
 
         public static int WM_COPYDATA = 0x004A;
@@ -24,15 +21,14 @@ namespace betterpad
         {
             int result = 0;
 
-            if (hWnd.ToInt32() > 0)
+            if (hWnd != IntPtr.Zero)
             {
-                //only to get the actual length
-                var msgBytes = Encoding.Default.GetBytes(msg);
+                var msgByteCount = Encoding.Default.GetByteCount(msg);
                 COPYDATASTRUCT cds = new COPYDATASTRUCT()
                 {
-                    dwData = messageCode,
-                    message = msg,
-                    cbData = msgBytes.Length + 1
+                    Data = messageCode,
+                    Messag = msg,
+                    Length = msgByteCount + 1
                 };
                 result = SendMessage(hWnd, WM_COPYDATA, wParam, ref cds);
             }
@@ -51,7 +47,7 @@ namespace betterpad
             }
 
             var cds = (COPYDATASTRUCT)msg.GetLParam(typeof(COPYDATASTRUCT));
-            return cds.message;
+            return cds.Messag;
         }
 
         [DllImport("user32.dll")]

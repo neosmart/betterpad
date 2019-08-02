@@ -1,10 +1,8 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Drawing;
 using System.IO;
 using System.Linq;
-using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -17,18 +15,18 @@ namespace betterpad
         /// The main entry point for the application.
         /// </summary>
         [STAThread]
-        static void Main()
+        static async Task Main()
         {
             using (var mutex = new Mutex(false, "{99EC16DC-9097-4931-BFF2-869E15A17AB4}"))
             {
                 if (!mutex.WaitOne(0))
                 {
-                    //Another session exists
+                    // Another session exists
                     BringToForeground(Environment.GetCommandLineArgs().Skip(1));
                     return;
                 }
 
-                //register application path in HKCU registry
+                // Register application path in HKCU registry
                 var setup = new Setup();
                 setup.RegisterAppPath();
 
@@ -39,7 +37,8 @@ namespace betterpad
                 Application.EnableVisualStyles();
                 Application.SetCompatibleTextRenderingDefault(false);
 
-                new WindowManager();
+                var wm = new WindowManager();
+                await wm.StartAsync();
             }
         }
 
@@ -52,28 +51,33 @@ namespace betterpad
             }
 
             var processes = Process.GetProcessesByName(Path.GetFileNameWithoutExtension(Application.ExecutablePath));
-            foreach (var process in processes)
+            try
             {
-                if (process.Id == pid)
+                foreach (var process in processes)
                 {
-                    //just us, keep going
-                    continue;
-                }
-
-                Win32.SetForegroundWindow(process.MainWindowHandle);
-                if (paths != null)
-                {
-                    foreach (var path in paths)
+                    if (process.Id == pid)
                     {
-                        var fullPath = Path.GetFullPath(path);
-                        Win32.SendWindowsStringMessage(process.MainWindowHandle, 0, fullPath, IntPtr.Zero);
+                        // Just us, keep going
+                        continue;
+                    }
+
+                    Win32.SetForegroundWindow(process.MainWindowHandle);
+                    if (paths != null)
+                    {
+                        foreach (var path in paths)
+                        {
+                            var fullPath = Path.GetFullPath(path);
+                            Win32.SendWindowsStringMessage(process.MainWindowHandle, 0, fullPath, IntPtr.Zero);
+                        }
                     }
                 }
             }
-
-            foreach (var p in processes)
+            finally
             {
-                p.Dispose();
+                foreach (var p in processes)
+                {
+                    p.Dispose();
+                }
             }
         }
     }

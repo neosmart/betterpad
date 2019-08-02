@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -212,11 +212,11 @@ namespace betterpad
 
                         WindowManager.CreateNewWindow(new WindowManager.NewFormActions()
                         {
-                            AfterShow = (form) =>
+                            AfterShow = async (form) =>
                             {
                                 if (!string.IsNullOrEmpty(recoveryInfo.FilePath))
                                 {
-                                    form.Open(recoveryInfo.FilePath);
+                                    await form.OpenAsync(recoveryInfo.FilePath);
                                 }
 
                                 //only restore text if backup is newer than destination (or destination does not exist)

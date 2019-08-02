@@ -13,7 +13,7 @@ namespace MetroHash
         private const ulong K3_64_1  = 0x2F5870A5;
 
         //---------------------------------------------------------------------------//
-        public static void Hash64_1(byte[] lKey, uint lStartOffset, uint lLength, uint lSeed, out byte[] lOutput)
+        public static void Hash64_1(byte[] lKey, uint lStartOffset, uint lLength, uint lSeed, out ulong lHash)
         {
             uint lKeyIndex = lStartOffset;
             uint lKeyEnd = lKeyIndex + lLength;
@@ -27,8 +27,8 @@ namespace MetroHash
             {
                 fixed (byte* ptr = lKey)
                 {
-                    Hash64_1(ptr, lStartOffset, lLength, lSeed, out ulong lHash);
-                    lOutput = BitConverter.GetBytes(lHash);
+                    Hash64_1(ptr, lStartOffset, lLength, lSeed, out lHash);
+                    //lOutput = BitConverter.GetBytes(lHash);
                 }
             }
         }

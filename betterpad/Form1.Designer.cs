@@ -1,6 +1,6 @@
 ﻿namespace betterpad
 {
-    partial class Form1
+    partial class EditorWindow
     {
         /// <summary>
         /// Required designer variable.

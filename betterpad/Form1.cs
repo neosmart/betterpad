@@ -7,18 +7,23 @@ using System.IO.MemoryMappedFiles;
 using System.Linq;
 using System.Media;
 using System.Reflection;
-using System.Runtime.InteropServices;
+using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace betterpad
 {
-    public partial class Form1 : Form
+    public partial class EditorWindow : Form
     {
-        private Dictionary<Keys, Action> _shortcuts;
+        delegate Task AsyncAction();
+        private Dictionary<Keys, AsyncAction> _shortcuts;
         private const int MmapSize = 32;
+        /// <summary>
+        /// This memory map is used to access data shared between all instances
+        /// </summary>
         private readonly MemoryMappedFile _mmap = MemoryMappedFile.CreateOrOpen("{6472DD80-A7A5-4F44-BAD4-69BB7F9580DE}", MmapSize);
         private int _documentNumber;
         public string FilePath { get; private set; }
@@ -27,9 +32,10 @@ namespace betterpad
         private FindDialog _finder;
         private FindStatus _findStatus = new FindStatus();
         private object _statusTimerLock = new object();
-        private Timer _statusTimer;
+        private System.Windows.Forms.Timer _statusTimer;
         private bool _ignoreSettings = false;
         public BetterRichTextBox BetterBox => text;
+        public CancellationToken Cancel { get; set; }
 
         private bool DocumentChanged
         {
@@ -51,11 +57,11 @@ namespace betterpad
             }
         }
 
-        public Action<Form1> StartAction { get; internal set; }
+        public Func<EditorWindow, Task> StartAction { get; internal set; }
 
         private ulong _lastHash;
 
-        public Form1()
+        public EditorWindow()
         {
             InitializeComponent();
             InitializeShortcuts();
@@ -78,7 +84,7 @@ namespace betterpad
 
             text.LinkClicked += (s, e) =>
             {
-                //Only open URLs if the ctrl button is held down
+                // Only open URLs if the ctrl button is held down
                 if (!((ModifierKeys & Keys.Control) == Keys.Control))
                 {
                     SetStatus("Hold down CTRL and click to open URL");
@@ -111,7 +117,7 @@ namespace betterpad
 
         private void GetDocumentNumber()
         {
-            //purposely not disposing the mmap
+            // The mmap is purposely not disposed
             using (new ScopedMutex(true, "{8BED64DE-A2F9-408F-A223-92EDAD8D90E8}"))
             using (var view = _mmap.CreateViewAccessor(0, MmapSize))
             {
@@ -133,73 +139,73 @@ namespace betterpad
 
         private void InitializeShortcuts()
         {
-            _shortcuts = new Dictionary<Keys, Action>
+            _shortcuts = new Dictionary<Keys, AsyncAction>
             {
                 //File menu
-                { Keys.Control | Keys.N, NewWindow },
-                { Keys.Control | Keys.O, () => Open() },
-                { Keys.Control | Keys.S, () => Save() },
-                { Keys.Control | Keys.Shift | Keys.S, () => SaveAs() },
-                { Keys.F12, () => SaveAs() },
-                { Keys.Control | Keys.P, Print },
-                { Keys.Control | Keys.W, Exit },
+                { Keys.Control | Keys.N, () => Task.Run(NewWindow) },
+                { Keys.Control | Keys.O, OpenAsync },
+                { Keys.Control | Keys.S, SaveAsync },
+                { Keys.Control | Keys.Shift | Keys.S, SaveAsAsync },
+                { Keys.F12, SaveAsAsync },
+                { Keys.Control | Keys.P, () => Task.Run(Print) },
+                { Keys.Control | Keys.W, ExitAsync },
                 //Edit menu
-                { Keys.Control | Keys.X, Cut },
-                { Keys.Control | Keys.C, Copy },
-                { Keys.Control | Keys.V, Paste },
-                { Keys.Control | Keys.Y, text.Redo },
-                { Keys.Control | Keys.F, () => Find() },
-                { Keys.F3, () => FindNext() },
-                { Keys.Shift | Keys.F3, FindPrevious },
-                { Keys.Control | Keys.H, Replace },
-                { Keys.Control | Keys.G, GoTo },
-                { Keys.F5, TimeDate },
+                { Keys.Control | Keys.X, () => Task.Run(Cut) },
+                { Keys.Control | Keys.C, () => Task.Run(Copy) },
+                { Keys.Control | Keys.V, () => Task.Run(Paste) },
+                { Keys.Control | Keys.Y, () => Task.Run(text.Redo) },
+                { Keys.Control | Keys.F, () => Task.Run(Find) },
+                { Keys.F3, () => { FindNext(); return Task.CompletedTask; } },
+                { Keys.Shift | Keys.F3, () => Task.Run(FindPrevious) },
+                { Keys.Control | Keys.H, () => Task.Run(Replace) },
+                { Keys.Control | Keys.G, () => Task.Run(GoTo) },
+                { Keys.F5, () => Task.Run(TimeDate) },
                 //Help menu
-                { Keys.F1, BetterpadHelp },
+                { Keys.F1, () => Task.Run(BetterpadHelp) },
             };
         }
 
         private void InitializeMenuHandlers()
         {
-            var handlers = new Dictionary<MenuItem, Action>
+            var handlers = new Dictionary<MenuItem, AsyncAction>
             {
                 //File menu
-                { newToolStripMenuItem, NewWindow },
-                { openToolStripMenuItem, () => Open() },
-                { saveToolStripMenuItem, () => Save() },
-                { saveAsToolStripMenuItem, () => SaveAs() },
-                { pageSetupToolStripMenuItem, PageSetup },
-                { printToolStripMenuItem, Print },
-                { exitToolStripMenuItem, Close },
+                { newToolStripMenuItem, () => { NewWindow(); return Task.CompletedTask; } },
+                { openToolStripMenuItem, async () => await OpenAsync() },
+                { saveToolStripMenuItem, async () => await SaveAsync() },
+                { saveAsToolStripMenuItem, async () => await SaveAsAsync() },
+                { pageSetupToolStripMenuItem, () => { PageSetup(); return Task.CompletedTask; } },
+                { printToolStripMenuItem, () => { Print(); return Task.CompletedTask; } },
+                { exitToolStripMenuItem, () => { Close(); return Task.CompletedTask; } },
                 //Edit menu
-                { undoToolStripMenuItem, text.Undo },
-                { redoToolStripMenuItem, text.Redo },
-                { cutToolStripMenuItem, Cut },
-                { copyToolStripMenuItem, Copy },
-                { pasteToolStripMenuItem, Paste },
-                { deleteToolStripMenuItem, Delete },
-                { findToolStripMenuItem, () => Find() },
-                { findNextToolStripMenuItem, () => FindNext() },
-                { replaceToolStripMenuItem, Replace },
-                { goToToolStripMenuItem, GoTo },
-                { selectAllToolStripMenuItem, text.SelectAll },
-                { timeDateToolStripMenuItem, TimeDate },
+                { undoToolStripMenuItem, () => { text.Undo(); return Task.CompletedTask; } },
+                { redoToolStripMenuItem, () => { text.Redo(); return Task.CompletedTask; } },
+                { cutToolStripMenuItem, () => { Cut(); return Task.CompletedTask; } },
+                { copyToolStripMenuItem, () => { Copy(); return Task.CompletedTask; } },
+                { pasteToolStripMenuItem, () => { Paste(); return Task.CompletedTask; } },
+                { deleteToolStripMenuItem, () => { Delete(); return Task.CompletedTask; } },
+                { findToolStripMenuItem, () => { Find(); return Task.CompletedTask; } },
+                { findNextToolStripMenuItem, () => { FindNext(); return Task.CompletedTask; } },
+                { replaceToolStripMenuItem, () => { Replace(); return Task.CompletedTask; } },
+                { goToToolStripMenuItem, () => { GoTo(); return Task.CompletedTask; } },
+                { selectAllToolStripMenuItem, () => { text.SelectAll(); return Task.CompletedTask; } },
+                { timeDateToolStripMenuItem, () => { TimeDate(); return Task.CompletedTask; } },
                 //Format menu
-                { wordWrapToolStripMenuItem, ToggleWordWrap },
-                { fontToolStripMenuItem, ConfigureFont },
+                { wordWrapToolStripMenuItem, () => { ToggleWordWrap(); return Task.CompletedTask; } },
+                { fontToolStripMenuItem, () => { ConfigureFont(); return Task.CompletedTask; } },
                 //View menu
-                { statusBarToolStripMenuItem, StatusBar },
+                { statusBarToolStripMenuItem, () => { StatusBar(); return Task.CompletedTask; } },
                 //Help menu
-                { viewHelpToolStripMenuItem, BetterpadHelp },
+                { viewHelpToolStripMenuItem, () => { BetterpadHelp(); return Task.CompletedTask; } },
                 { checkForUpdateMenuItem, CheckForUpdatesAsync },
-                { aboutBetterpadToolStripMenuItem, About },
+                { aboutBetterpadToolStripMenuItem, () => { About(); return Task.CompletedTask; } },
             };
 
             foreach (var menuItem in handlers.Keys)
             {
-                menuItem.Click += (sender, args) =>
+                menuItem.Click += async (sender, args) =>
                 {
-                    handlers[menuItem]();
+                    await handlers[menuItem]();
                 };
             }
         }
@@ -266,21 +272,22 @@ namespace betterpad
             WindowManager.CreateNewWindow();
         }
 
-        private bool Open()
+        private async Task<bool> OpenAsync()
         {
             var inNewWindow = DocumentChanged || text.Text.Length != 0;
-            if (inNewWindow)
+
+            DocumentChangeStatus changeStatus = DocumentChangeStatus.NoChanges;
+            if (!inNewWindow)
             {
-                OpenNew();
-                return true;
+                changeStatus = await MaybeSaveAndGetStatusAsync();
+                if (changeStatus == DocumentChangeStatus.ChangedNotSaved)
+                {
+                    return false;
+                }
             }
 
-            bool documentChanged = false;
-            if (!UnsavedChanges(ref documentChanged))
-            {
-                return false;
-            }
-            documentChanged = documentChanged || !string.IsNullOrEmpty(FilePath) || text.Text != "";
+            var documentChanged = changeStatus == DocumentChangeStatus.ChangedAndSaved
+                || !string.IsNullOrEmpty(FilePath) || text.Text != "";
 
             bool result = true;
             using (var dialog = new OpenFileDialog()
@@ -302,18 +309,26 @@ namespace betterpad
                 {
                     var first = dialog.FileNames.First();
 
-                    //first document
-                    Open(first);
-                    //Decrement the document number IF no changes had been made AND no new document was created in the meantime
-                    if (!documentChanged)
+                    // first document
+                    if (inNewWindow)
                     {
-                        DecrementDocumentNumber();
+                        OpenNew(first, sameLocation: false);
+                    }
+                    else
+                    {
+                        await OpenAsync(first);
+
+                        // Decrement the document number IF no changes had been made AND no new document was created in the meantime
+                        if (!documentChanged)
+                        {
+                            DecrementDocumentNumber();
+                        }
                     }
 
                     //subsequent documents, if any
                     foreach (var doc in dialog.FileNames.Skip(1))
                     {
-                        OpenNew(doc, false);
+                        OpenNew(doc, sameLocation: false);
                     }
                 }
                 else
@@ -344,13 +359,12 @@ namespace betterpad
                     }
                     form.Visible = false;
                 },
-                AfterShow = (form) =>
+                AfterShow = async (form) =>
                 {
                     form.Size = Size;
-                    form.Hide();
                     if (string.IsNullOrEmpty(path))
                     {
-                        if (!form.Open())
+                        if (!await form.OpenAsync())
                         {
                             form.Close();
                             DecrementDocumentNumber();
@@ -359,11 +373,10 @@ namespace betterpad
                     }
                     else
                     {
-                        form.Open(path);
+                        await form.OpenAsync(path);
                         DecrementDocumentNumber();
                     }
 
-                    form.Show();
                     form.Focus();
                     form.BringToFront();
                 }
@@ -371,7 +384,7 @@ namespace betterpad
             WindowManager.CreateNewWindow(actions);
         }
 
-        public void Open(string path)
+        public async Task OpenAsync(string path)
         {
             var dir = Path.GetDirectoryName(path);
             if (!Directory.Exists(dir))
@@ -395,7 +408,7 @@ namespace betterpad
             using (var file = File.Open(path, FileMode.Open, FileAccess.Read, FileShare.Read | FileShare.Write | FileShare.Delete))
             using (var reader = new StreamReader(file, Encoding.UTF8))
             {
-                text.Text = reader.ReadToEnd();
+                text.Text = await reader.ReadToEndAsync();
             }
             var justCreated = (DateTime.UtcNow - File.GetCreationTimeUtc(path)) < TimeSpan.FromMilliseconds(1000);
             SetStatus(string.Format("Document {0}", justCreated ? "created" : "loaded"));
@@ -404,7 +417,12 @@ namespace betterpad
             GC.Collect();
         }
 
-        private bool SaveAs(string filePath = null)
+        private Task<bool> SaveAsAsync()
+        {
+            return SaveAsAsync(null);
+        }
+
+        private async Task<bool> SaveAsAsync(string filePath)
         {
             while (true)
             {
@@ -432,32 +450,42 @@ namespace betterpad
                     }
                 }
 
-                if (!Save(filePath, out var abort))
+                switch (await SaveAsync(filePath))
                 {
-                    if (abort)
-                    {
+                    case SaveResult.Ok:
+                        FilePath = filePath;
+                        return true;
+                    case SaveResult.Retry:
+                        continue;
+                    case SaveResult.Cancel:
                         return false;
-                    }
-                    continue;
                 }
-
-                FilePath = filePath;
-                return true;
             }
         }
 
-        private bool Save()
+        private Task<bool> SaveAsync()
         {
-            return SaveAs(FilePath);
+            return SaveAsAsync(FilePath);
         }
 
-        private bool Save(string path, out bool abort)
+        enum SaveResult
+        {
+            Ok,
+            Retry,
+            Cancel
+        }
+
+        private async Task<SaveResult> SaveAsync(string path)
         {
             bool alreadyThere = File.Exists(path);
 
             try
             {
-                File.WriteAllText(path, text.Text, new UTF8Encoding(false));
+                using (var file = File.Open(path, FileMode.OpenOrCreate, FileAccess.Write, FileShare.Read))
+                using (var writer = new StreamWriter(file, new UTF8Encoding(false)))
+                {
+                    await writer.WriteAsync(text.Text);
+                }
                 SetTitle(Path.GetFileName(path));
                 SetStatus($"{(alreadyThere ? "Changes" : "Document")} saved");
             }
@@ -469,21 +497,18 @@ namespace betterpad
                     "Access denied!", MessageBoxButtons.OKCancel, MessageBoxIcon.Error,
                     MessageBoxDefaultButton.Button1);
 
-                abort = result == DialogResult.Cancel;
-                return false;
+                return result == DialogResult.Cancel ? SaveResult.Cancel : SaveResult.Retry;
             }
             catch (Exception ex)
             {
-                var dialogResult = MessageBox.Show(this, ex.Message, "Error saving file!",
+                var result = MessageBox.Show(this, ex.Message, "Error saving file!",
                     MessageBoxButtons.RetryCancel, MessageBoxIcon.Error);
 
-                abort = dialogResult == DialogResult.Cancel;
-                return false;
+                return result == DialogResult.Cancel ? SaveResult.Cancel : SaveResult.Retry;
             }
 
-            abort = true;
             _lastHash = DocumentHash;
-            return true;
+            return SaveResult.Ok;
         }
 
         private void PageSetup()
@@ -494,9 +519,9 @@ namespace betterpad
         {
         }
 
-        private void Exit()
+        private async Task ExitAsync()
         {
-            if (!UnsavedChanges())
+            if (await MaybeSaveAndGetStatusAsync() == DocumentChangeStatus.ChangedNotSaved)
             {
                 return;
             }
@@ -802,9 +827,9 @@ namespace betterpad
             //NotImplementedException();
         }
 
-        private async void CheckForUpdatesAsync()
+        private async Task CheckForUpdatesAsync()
         {
-            using var statusTimer = new Timer();
+            using var statusTimer = new System.Windows.Forms.Timer();
             statusTimer.Interval = 500;
 
             uint dotCount = 0;
@@ -856,12 +881,12 @@ namespace betterpad
                     form.Width = 800;
                     form.StartPosition = FormStartPosition.CenterParent;
                 },
-                AfterShow = (form) =>
+                AfterShow = async (form) =>
                 {
                     var sb = new StringBuilder();
                     sb.AppendLine($"betterpad by NeoSmart Technologies");
                     sb.AppendLine($"https://neosmart.net/betterpad/\r\n");
-                    sb.AppendLine($"Version {ShortVersion} - build {BuildHash}\r\n");
+                    sb.AppendLine($"Version {ShortVersion} - build {await CalculateBuildHashAsync()}\r\n");
                     sb.AppendLine($"Copyright © NeoSmart Technologies 2016-{DateTime.UtcNow.Year}");
                     sb.AppendLine("All rights reserved.\r\n\r\n");
 
@@ -877,11 +902,12 @@ namespace betterpad
                     form.text.SelectionStart = 0;
 
                     form._shortcuts.Clear();
-                    form._shortcuts.Add(Keys.Escape, () => form.Close());
-                    form._shortcuts.Add(Keys.Control | Keys.W, () => form.Close());
+                    form._shortcuts.Add(Keys.Escape, () => { form.Close(); return Task.CompletedTask; });
+                    form._shortcuts.Add(Keys.Control | Keys.W, () => { form.Close(); return Task.CompletedTask; });
                 }
             };
-            using (var about = new Form1())
+
+            using (var about = new EditorWindow())
             {
                 actions.BeforeShow(about);
 
@@ -905,14 +931,48 @@ namespace betterpad
             }
         }
 
-        private string BuildHash
+        private static string _buildHash;
+        public static async Task<string> CalculateBuildHashAsync()
         {
-            get
+            if (_buildHash == null)
             {
-                var bytes = System.IO.File.ReadAllBytes(Application.ExecutablePath);
-                MetroHash.MetroHash.Hash64_1(bytes, 0, (uint)bytes.Length, 0, out var hash);
-                return BitConverter.ToString(hash, 0).Replace("-", "").ToLower();
+                using (var file = File.Open(Application.ExecutablePath, FileMode.Open, FileAccess.Read, FileShare.Read))
+                using (var sha = SHA1.Create())
+                {
+                    byte[] hash;
+                    var buffer = new byte[sha.InputBlockSize];
+                    var shaBuffer = new byte[sha.OutputBlockSize];
+
+                    int offset = 0;
+                    int bytesRead = 0;
+                    while (true)
+                    {
+                        bytesRead = await file.ReadAsync(buffer, offset, buffer.Length - bytesRead);
+                        offset += bytesRead;
+
+                        // Results must be deterministic, so we must guarantee a complete buffer each time
+                        if (bytesRead != 0 && bytesRead != buffer.Length)
+                        {
+                            continue;
+                        }
+
+                        if (bytesRead == 0)
+                        {
+                            hash = sha.TransformFinalBlock(buffer, 0, offset);
+                            break;
+                        }
+                        else
+                        {
+                            sha.TransformBlock(buffer, 0, offset, shaBuffer, 0);
+                            // Reset offset for next round
+                            offset = 0;
+                        }
+                    }
+                    _buildHash = BitConverter.ToString(hash, 0).Replace("-", "").ToLower();
+                }
             }
+
+            return _buildHash;
         }
 
         private void text_SelectionChanged(Object sender, EventArgs e)
@@ -922,50 +982,56 @@ namespace betterpad
             copyToolStripMenuItem.Enabled = text.TextSelected;
         }
 
-        private bool UnsavedChanges()
+        private async Task<bool> MaybeSaveAsync()
         {
-            bool documentChanged = false;
-            return UnsavedChanges(ref documentChanged);
+            return await MaybeSaveAndGetStatusAsync() != DocumentChangeStatus.ChangedNotSaved;
         }
 
-        private bool UnsavedChanges(ref bool documentChanged)
+        enum DocumentChangeStatus
+        {
+            NoChanges,
+            ChangedAndSaved,
+            ChangedNotSaved,
+        }
+
+        private async Task<DocumentChangeStatus> MaybeSaveAndGetStatusAsync()
         {
             if (_ignoreChanges)
             {
-                return true;
+                return DocumentChangeStatus.NoChanges;
             }
 
             if (RecoveryManager.ShutdownInProgress)
             {
                 RecoveryManager.ShutdownDumpComplete.Wait();
-                return true;
+                return DocumentChangeStatus.NoChanges;
             }
 
             if (DocumentChanged)
             {
-                documentChanged = true;
                 var result = MessageBox.Show(this,
                     "The document has unsaved changes. Do you want to save changes before closing?", "Save changes?",
                     MessageBoxButtons.YesNoCancel, MessageBoxIcon.Question);
+
                 if (result == DialogResult.Cancel)
                 {
-                    return false;
+                    return DocumentChangeStatus.ChangedNotSaved;
                 }
                 if (result == DialogResult.Yes)
                 {
-                    if (!Save())
+                    if (!await SaveAsync())
                     {
-                        return false;
+                        return DocumentChangeStatus.ChangedNotSaved;
                     }
                 }
             }
 
-            return true;
+            return DocumentChangeStatus.ChangedAndSaved;
         }
 
-        private void Form1_FormClosing(Object sender, FormClosingEventArgs e)
+        private async void Form1_FormClosing(Object sender, FormClosingEventArgs e)
         {
-            if (!UnsavedChanges())
+            if (!await MaybeSaveAsync())
             {
                 e.Cancel = true;
             }
@@ -973,17 +1039,23 @@ namespace betterpad
             SavePreferences();
         }
 
-        private void Form1_Shown(object sender, EventArgs e)
+        private async void Form1_Shown(object sender, EventArgs e)
         {
-            //Run any actions queued by window manager
-            StartAction?.Invoke(this);
+        }
+
+        private async void OnCmdKey(Keys keyData)
+        {
+            if (_shortcuts.TryGetValue(keyData, out var action))
+            {
+                await action();
+            }
         }
 
         protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
         {
             if (_shortcuts.TryGetValue(keyData, out var action))
             {
-                action();
+                var task = action();
                 return true;
             }
 
@@ -1007,8 +1079,8 @@ namespace betterpad
                 lock (_statusTimerLock)
                 {
                     lblStatus1.Text = " ";
-                    (sender as Timer).Stop();
-                    (sender as Timer).Dispose();
+                    (sender as System.Windows.Forms.Timer).Stop();
+                    (sender as System.Windows.Forms.Timer).Dispose();
                 }
             }));
         }
@@ -1025,7 +1097,7 @@ namespace betterpad
                     _statusTimer?.Stop();
                     _statusTimer?.Dispose();
 
-                    _statusTimer = new Timer();
+                    _statusTimer = new System.Windows.Forms.Timer();
 
                     _statusTimer.Interval = (int)timeout.TotalMilliseconds;
                     _statusTimer.Tick += ResetStatus;
@@ -1034,7 +1106,7 @@ namespace betterpad
             }
         }
 
-        private void DragDropHandler(object sender, DragEventArgs e)
+        private async void DragDropHandler(object sender, DragEventArgs e)
         {
             var inNewWindow = DocumentChanged || text.Text.Length != 0;
             var paths = (string[])e.Data.GetData(DataFormats.FileDrop);
@@ -1047,7 +1119,7 @@ namespace betterpad
                 else
                 {
                     inNewWindow = true; //we can only replace one document
-                    Open(path);
+                    await OpenAsync(path);
                 }
             }
         }
