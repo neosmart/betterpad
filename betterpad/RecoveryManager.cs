@@ -104,7 +104,7 @@ namespace betterpad
                         oldFiles = Directory.GetFiles(tempDir);
                     }
 
-                    foreach (var form in WindowManager.ActiveDocuments)
+                    foreach (var form in WindowManager.ActiveDocuments.ToArray())
                     {
                         if (!form.RecoveryEnabled)
                         {
