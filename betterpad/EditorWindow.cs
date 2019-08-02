@@ -34,8 +34,16 @@ namespace betterpad
         private object _statusTimerLock = new object();
         private System.Windows.Forms.Timer _statusTimer;
         private bool _ignoreSettings = false;
+        /// <summary>
+        /// Used by the WindowManager to make a "dialog box" blocking its parent
+        /// </summary>
+        public EditorWindow ParentWindow { get; private set; } = null;
         public BetterRichTextBox BetterBox => text;
         public CancellationToken Cancel { get; set; }
+        /// <summary>
+        /// Whether or not this form will be recovered by the Window Manager in case of an unsafe shutdown.
+        /// </summary>
+        public bool RecoveryEnabled { get; set; } = true;
 
         private bool DocumentChanged
         {
@@ -877,9 +885,19 @@ namespace betterpad
             {
                 BeforeShow = (form) =>
                 {
+                    form.ParentWindow = this;
+
                     form.Height = 500;
                     form.Width = 800;
                     form.StartPosition = FormStartPosition.CenterParent;
+
+                    form.mainMenu1.MenuItems.Clear();
+                    form.FormBorderStyle = FormBorderStyle.FixedSingle;
+                    form.SizeGripStyle = SizeGripStyle.Hide;
+                    form.ShowInTaskbar = false;
+                    form.MaximizeBox = false;
+                    form.MinimizeBox = false;
+                    form.RecoveryEnabled = false;
                 },
                 AfterShow = async (form) =>
                 {
@@ -907,19 +925,10 @@ namespace betterpad
                 }
             };
 
-            using (var about = new EditorWindow())
-            {
-                actions.BeforeShow(about);
-
-                about.mainMenu1.MenuItems.Clear();
-                about.StartAction = actions.AfterShow;
-                about.FormBorderStyle = FormBorderStyle.FixedSingle;
-                about.SizeGripStyle = SizeGripStyle.Hide;
-                about.ShowInTaskbar = false;
-                about.MaximizeBox = false;
-                about.MinimizeBox = false;
-                about.ShowDialog(this);
-            }
+            var about = new EditorWindow();
+            actions.BeforeShow(about);
+            about.Shown += async (s, e) => await actions.AfterShow(about);
+            about.ShowDialog(this);
         }
 
         private string ShortVersion
@@ -936,18 +945,25 @@ namespace betterpad
         {
             if (_buildHash == null)
             {
-                using (var file = File.Open(Application.ExecutablePath, FileMode.Open, FileAccess.Read, FileShare.Read))
+                var buffer = new byte[4096];
+                using (var file = new FileStream(Application.ExecutablePath, FileMode.Open, FileAccess.Read, FileShare.Read,
+                    buffer.Length, FileOptions.Asynchronous | FileOptions.SequentialScan))
                 using (var sha = SHA1.Create())
                 {
                     byte[] hash;
-                    var buffer = new byte[sha.InputBlockSize];
-                    var shaBuffer = new byte[sha.OutputBlockSize];
 
                     int offset = 0;
                     int bytesRead = 0;
                     while (true)
                     {
+                        // There's a really weird bug with .NET 4.7 on Windows 10, causing ReadAsync
+                        // to incorrectly return 0 bytes once after each correct full-buffer read :S
                         bytesRead = await file.ReadAsync(buffer, offset, buffer.Length - bytesRead);
+                        if (bytesRead == 0 && file.Position != file.Length)
+                        {
+                            continue;
+                        }
+
                         offset += bytesRead;
 
                         // Results must be deterministic, so we must guarantee a complete buffer each time
@@ -958,17 +974,18 @@ namespace betterpad
 
                         if (bytesRead == 0)
                         {
-                            hash = sha.TransformFinalBlock(buffer, 0, offset);
+                            sha.TransformFinalBlock(buffer, 0, offset);
+                            hash = sha.Hash;
                             break;
                         }
                         else
                         {
-                            sha.TransformBlock(buffer, 0, offset, shaBuffer, 0);
+                            sha.TransformBlock(buffer, 0, offset, buffer, 0);
                             // Reset offset for next round
                             offset = 0;
                         }
                     }
-                    _buildHash = BitConverter.ToString(hash, 0).Replace("-", "").ToLower();
+                    _buildHash = BitConverter.ToString(hash, 0).Replace("-", "").ToLower().Substring(0, 20);
                 }
             }
 

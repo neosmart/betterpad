@@ -93,26 +93,32 @@ namespace betterpad
                         // Threads registering drag-and-drop handlers must be STA
                         var thread = new Thread(() =>
                         {
-                            Interlocked.Increment(ref ThreadCounter);
-                            try
+                        Interlocked.Increment(ref ThreadCounter);
+                        try
+                        {
+                            if (WindowQueue.Any())
                             {
-                                if (WindowQueue.Any())
+                                using (var form = new EditorWindow()
                                 {
-                                    using (var form = new EditorWindow()
-                                    {
-                                        Cancel = cancelAll.Token
-                                    })
-                                    {
-                                        _activeWindows.Add(form);
-                                        var handler = WindowQueue.Dequeue();
-                                        handler.BeforeShow?.Invoke(form);
+                                    Cancel = cancelAll.Token
+                                })
+                                {
+                                    _activeWindows.Add(form);
+                                    var handler = WindowQueue.Dequeue();
+                                    handler.BeforeShow?.Invoke(form);
                                         if (handler.AfterShow != null)
                                         {
-                                            form.Shown += async (s, e) =>
                                             {
-                                                await handler.AfterShow(form);
-                                            };
+                                                form.Shown += (s, e) =>
+                                                {
+                                                    form.Invoke((Action)(async () =>
+                                                    {
+                                                        await handler.AfterShow(form);
+                                                    }));
+                                                };
+                                            }
                                         }
+
                                         form.ShowDialog();
                                         _activeWindows.Remove(form);
                                     }

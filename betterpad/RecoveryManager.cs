@@ -106,6 +106,11 @@ namespace betterpad
 
                     foreach (var form in WindowManager.ActiveDocuments)
                     {
+                        if (!form.RecoveryEnabled)
+                        {
+                            continue;
+                        }
+
                         //try...catch here so we can attempt to salvage at least one document
                         try
                         {
