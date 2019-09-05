@@ -145,31 +145,52 @@ namespace betterpad
             }
         }
 
+        private Task UiExecute(Action action)
+        {
+            if (InvokeRequired)
+            {
+                return Task.Factory.FromAsync(BeginInvoke((Action)(() => action())), EndInvoke);
+            }
+
+            action();
+            return Task.CompletedTask;
+        }
+
+        private Task UiExecute(AsyncAction action)
+        {
+            if (InvokeRequired)
+            {
+                return Task.Factory.FromAsync(BeginInvoke((Action)(() => action())), EndInvoke);
+            }
+
+            return action();
+        }
+
         private void InitializeShortcuts()
         {
             _shortcuts = new Dictionary<Keys, AsyncAction>
             {
-                //File menu
-                { Keys.Control | Keys.N, () => Task.Run(NewWindow) },
+                // File menu
+                { Keys.Control | Keys.N, () => UiExecute(NewWindow) },
                 { Keys.Control | Keys.O, OpenAsync },
                 { Keys.Control | Keys.S, SaveAsync },
                 { Keys.Control | Keys.Shift | Keys.S, SaveAsAsync },
                 { Keys.F12, SaveAsAsync },
-                { Keys.Control | Keys.P, () => Task.Run(Print) },
+                { Keys.Control | Keys.P, () => UiExecute(Print) },
                 { Keys.Control | Keys.W, ExitAsync },
-                //Edit menu
-                { Keys.Control | Keys.X, () => Task.Run(Cut) },
-                { Keys.Control | Keys.C, () => Task.Run(Copy) },
-                { Keys.Control | Keys.V, () => Task.Run(Paste) },
-                { Keys.Control | Keys.Y, () => Task.Run(text.Redo) },
-                { Keys.Control | Keys.F, () => Task.Run(Find) },
-                { Keys.F3, () => { FindNext(); return Task.CompletedTask; } },
-                { Keys.Shift | Keys.F3, () => Task.Run(FindPrevious) },
-                { Keys.Control | Keys.H, () => Task.Run(Replace) },
-                { Keys.Control | Keys.G, () => Task.Run(GoTo) },
-                { Keys.F5, () => Task.Run(TimeDate) },
-                //Help menu
-                { Keys.F1, () => Task.Run(BetterpadHelp) },
+                // Edit menu
+                { Keys.Control | Keys.X, () => UiExecute(Cut) },
+                { Keys.Control | Keys.C, () => UiExecute(Copy) },
+                { Keys.Control | Keys.V, () => UiExecute(Paste) },
+                { Keys.Control | Keys.Y, () => UiExecute(text.Redo) },
+                { Keys.Control | Keys.F, () => UiExecute(() => Find()) },
+                { Keys.F3, () => UiExecute(() => FindNext()) },
+                { Keys.Shift | Keys.F3, () => UiExecute(FindPrevious) },
+                { Keys.Control | Keys.H, () => UiExecute(Replace) },
+                { Keys.Control | Keys.G, () => UiExecute(GoTo) },
+                { Keys.F5, () => UiExecute(TimeDate) },
+                // Help menu
+                { Keys.F1, () => UiExecute(BetterpadHelp) },
             };
         }
 
@@ -177,36 +198,36 @@ namespace betterpad
         {
             var handlers = new Dictionary<MenuItem, AsyncAction>
             {
-                //File menu
-                { newToolStripMenuItem, () => { NewWindow(); return Task.CompletedTask; } },
-                { openToolStripMenuItem, async () => await OpenAsync() },
-                { saveToolStripMenuItem, async () => await SaveAsync() },
-                { saveAsToolStripMenuItem, async () => await SaveAsAsync() },
-                { pageSetupToolStripMenuItem, () => { PageSetup(); return Task.CompletedTask; } },
-                { printToolStripMenuItem, () => { Print(); return Task.CompletedTask; } },
-                { exitToolStripMenuItem, () => { Close(); return Task.CompletedTask; } },
-                //Edit menu
-                { undoToolStripMenuItem, () => { text.Undo(); return Task.CompletedTask; } },
-                { redoToolStripMenuItem, () => { text.Redo(); return Task.CompletedTask; } },
-                { cutToolStripMenuItem, () => { Cut(); return Task.CompletedTask; } },
-                { copyToolStripMenuItem, () => { Copy(); return Task.CompletedTask; } },
-                { pasteToolStripMenuItem, () => { Paste(); return Task.CompletedTask; } },
-                { deleteToolStripMenuItem, () => { Delete(); return Task.CompletedTask; } },
-                { findToolStripMenuItem, () => { Find(); return Task.CompletedTask; } },
-                { findNextToolStripMenuItem, () => { FindNext(); return Task.CompletedTask; } },
-                { replaceToolStripMenuItem, () => { Replace(); return Task.CompletedTask; } },
-                { goToToolStripMenuItem, () => { GoTo(); return Task.CompletedTask; } },
-                { selectAllToolStripMenuItem, () => { text.SelectAll(); return Task.CompletedTask; } },
-                { timeDateToolStripMenuItem, () => { TimeDate(); return Task.CompletedTask; } },
-                //Format menu
-                { wordWrapToolStripMenuItem, () => { ToggleWordWrap(); return Task.CompletedTask; } },
-                { fontToolStripMenuItem, () => { ConfigureFont(); return Task.CompletedTask; } },
-                //View menu
-                { statusBarToolStripMenuItem, () => { StatusBar(); return Task.CompletedTask; } },
-                //Help menu
-                { viewHelpToolStripMenuItem, () => { BetterpadHelp(); return Task.CompletedTask; } },
+                // File menu
+                { newToolStripMenuItem, () => UiExecute(NewWindow) },
+                { openToolStripMenuItem, () => UiExecute(() => OpenAsync()) },
+                { saveToolStripMenuItem, () => UiExecute(() => SaveAsync()) },
+                { saveAsToolStripMenuItem, () => UiExecute(() => SaveAsAsync()) },
+                { pageSetupToolStripMenuItem, () => UiExecute(PageSetup) },
+                { printToolStripMenuItem, () => UiExecute(Print) },
+                { exitToolStripMenuItem, () => UiExecute(Close) },
+                // Edit menu
+                { undoToolStripMenuItem, () => UiExecute(text.Undo) },
+                { redoToolStripMenuItem, () => UiExecute(text.Redo) },
+                { cutToolStripMenuItem, () => UiExecute(Cut) },
+                { copyToolStripMenuItem, () => UiExecute(Copy) },
+                { pasteToolStripMenuItem, () => UiExecute(Paste) },
+                { deleteToolStripMenuItem, () => UiExecute(Delete) },
+                { findToolStripMenuItem, () => UiExecute(() => Find()) },
+                { findNextToolStripMenuItem, () => UiExecute(() => FindNext()) },
+                { replaceToolStripMenuItem, () => UiExecute(Replace) },
+                { goToToolStripMenuItem, () => UiExecute(GoTo) },
+                { selectAllToolStripMenuItem, () => UiExecute(text.SelectAll) },
+                { timeDateToolStripMenuItem, () => UiExecute(TimeDate) },
+                // Format menu
+                { wordWrapToolStripMenuItem, () => UiExecute(ToggleWordWrap) },
+                { fontToolStripMenuItem, () => UiExecute(ConfigureFont) },
+                // View menu
+                { statusBarToolStripMenuItem, () => UiExecute(StatusBar) },
+                // Help menu
+                { viewHelpToolStripMenuItem, () => UiExecute(BetterpadHelp) },
                 { checkForUpdateMenuItem, CheckForUpdatesAsync },
-                { aboutBetterpadToolStripMenuItem, () => { About(); return Task.CompletedTask; } },
+                { aboutBetterpadToolStripMenuItem, () => UiExecute(About) },
             };
 
             foreach (var menuItem in handlers.Keys)
@@ -237,12 +258,13 @@ namespace betterpad
 
         private void SetDefaultWidth()
         {
-            //These both return differing (and very wrong) answers on hi-dpi displays
-            //TextRender.MeasureText() is way too big while Graphics.MeasureString() is way too small
-            //Width = (int) (1.05 * TextRenderer.MeasureText(" ", text.Font).Width * 80);
-            //Width = (int)CreateGraphics().MeasureString(" ", text.Font).Width * 80;
+            // These both return differing (and very wrong) answers on hi-dpi displays
+            // TextRender.MeasureText() is way too big while Graphics.MeasureString() is way too small
+            //
+            // Width = (int) (1.05 * TextRenderer.MeasureText(" ", text.Font).Width * 80);
+            // Width = (int)CreateGraphics().MeasureString(" ", text.Font).Width * 80;
 
-            //testbox is a technically hidden but officially a visible part of the form
+            // testbox is a technically hidden but officially a visible part of the form
             testbox.Font = text.Font;
             testbox.Text = "                                                                                  ";
             Width = testbox.Width;
@@ -1072,7 +1094,7 @@ namespace betterpad
         {
             if (_shortcuts.TryGetValue(keyData, out var action))
             {
-                var task = action();
+                action();
                 return true;
             }
 
